@@ -14,7 +14,134 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      feedback: {
+        Row: {
+          anonymous: boolean
+          cleanliness: number | null
+          comments: string | null
+          created_at: string
+          id: string
+          phc_id: string
+          rating: number
+          service_used: string | null
+          staff_professionalism: number | null
+          waiting_time: number | null
+        }
+        Insert: {
+          anonymous?: boolean
+          cleanliness?: number | null
+          comments?: string | null
+          created_at?: string
+          id?: string
+          phc_id: string
+          rating: number
+          service_used?: string | null
+          staff_professionalism?: number | null
+          waiting_time?: number | null
+        }
+        Update: {
+          anonymous?: boolean
+          cleanliness?: number | null
+          comments?: string | null
+          created_at?: string
+          id?: string
+          phc_id?: string
+          rating?: number
+          service_used?: string | null
+          staff_professionalism?: number | null
+          waiting_time?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_phc_id_fkey"
+            columns: ["phc_id"]
+            isOneToOne: false
+            referencedRelation: "phcs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      health_articles: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          id: string
+          published: boolean
+          summary: string
+          tags: string[]
+          title: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          id?: string
+          published?: boolean
+          summary: string
+          tags?: string[]
+          title: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          id?: string
+          published?: boolean
+          summary?: string
+          tags?: string[]
+          title?: string
+        }
+        Relationships: []
+      }
+      phcs: {
+        Row: {
+          address: string
+          contact_phone: string | null
+          created_at: string
+          id: string
+          images: string[]
+          last_updated: string
+          latitude: number | null
+          longitude: number | null
+          name: string
+          operating_hours: Json
+          services: string[]
+          status: string
+          ward: string
+        }
+        Insert: {
+          address: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          images?: string[]
+          last_updated?: string
+          latitude?: number | null
+          longitude?: number | null
+          name: string
+          operating_hours?: Json
+          services?: string[]
+          status?: string
+          ward: string
+        }
+        Update: {
+          address?: string
+          contact_phone?: string | null
+          created_at?: string
+          id?: string
+          images?: string[]
+          last_updated?: string
+          latitude?: number | null
+          longitude?: number | null
+          name?: string
+          operating_hours?: Json
+          services?: string[]
+          status?: string
+          ward?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
