@@ -105,7 +105,7 @@ function Directory() {
                 value={q}
                 onChange={(e) => {
                   setQ(e.target.value);
-                  navigate({ search: (s) => ({ ...s, q: e.target.value || undefined }) });
+                  navigate({ search: (s: Record<string, unknown>) => ({ ...s, q: e.target.value || undefined }) });
                 }}
                 placeholder="Search by name, ward, or service"
                 className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
@@ -113,7 +113,7 @@ function Directory() {
             </div>
           </div>
           <div className="md:col-span-3">
-            <Select value={service} onValueChange={(v) => { setService(v); navigate({ search: (s) => ({ ...s, service: v === "all" ? undefined : v }) }); }}>
+            <Select value={service} onValueChange={(v) => { setService(v); navigate({ search: (s: Record<string, unknown>) => ({ ...s, service: v === "all" ? undefined : v }) }); }}>
               <SelectTrigger className="h-11"><SelectValue placeholder="Service" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All services</SelectItem>
@@ -124,7 +124,7 @@ function Directory() {
             </Select>
           </div>
           <div className="md:col-span-2">
-            <Select value={ward} onValueChange={(v) => { setWard(v); navigate({ search: (s) => ({ ...s, ward: v === "all" ? undefined : v }) }); }}>
+            <Select value={ward} onValueChange={(v) => { setWard(v); navigate({ search: (s: Record<string, unknown>) => ({ ...s, ward: v === "all" ? undefined : v }) }); }}>
               <SelectTrigger className="h-11"><SelectValue placeholder="Ward" /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All wards</SelectItem>
