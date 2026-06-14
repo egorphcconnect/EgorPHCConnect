@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as DirectoryRouteImport } from './routes/directory'
@@ -16,6 +17,11 @@ import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PhcIdRouteImport } from './routes/phc.$id'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HealthRoute = HealthRouteImport.update({
   id: '/health',
   path: '/health',
@@ -53,6 +59,7 @@ export interface FileRoutesByFullPath {
   '/directory': typeof DirectoryRoute
   '/feedback': typeof FeedbackRoute
   '/health': typeof HealthRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/phc/$id': typeof PhcIdRoute
 }
 export interface FileRoutesByTo {
@@ -61,6 +68,7 @@ export interface FileRoutesByTo {
   '/directory': typeof DirectoryRoute
   '/feedback': typeof FeedbackRoute
   '/health': typeof HealthRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/phc/$id': typeof PhcIdRoute
 }
 export interface FileRoutesById {
@@ -70,6 +78,7 @@ export interface FileRoutesById {
   '/directory': typeof DirectoryRoute
   '/feedback': typeof FeedbackRoute
   '/health': typeof HealthRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/phc/$id': typeof PhcIdRoute
 }
 export interface FileRouteTypes {
@@ -80,9 +89,17 @@ export interface FileRouteTypes {
     | '/directory'
     | '/feedback'
     | '/health'
+    | '/sitemap.xml'
     | '/phc/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/directory' | '/feedback' | '/health' | '/phc/$id'
+  to:
+    | '/'
+    | '/about'
+    | '/directory'
+    | '/feedback'
+    | '/health'
+    | '/sitemap.xml'
+    | '/phc/$id'
   id:
     | '__root__'
     | '/'
@@ -90,6 +107,7 @@ export interface FileRouteTypes {
     | '/directory'
     | '/feedback'
     | '/health'
+    | '/sitemap.xml'
     | '/phc/$id'
   fileRoutesById: FileRoutesById
 }
@@ -99,11 +117,19 @@ export interface RootRouteChildren {
   DirectoryRoute: typeof DirectoryRoute
   FeedbackRoute: typeof FeedbackRoute
   HealthRoute: typeof HealthRoute
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   PhcIdRoute: typeof PhcIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/health': {
       id: '/health'
       path: '/health'
@@ -155,6 +181,7 @@ const rootRouteChildren: RootRouteChildren = {
   DirectoryRoute: DirectoryRoute,
   FeedbackRoute: FeedbackRoute,
   HealthRoute: HealthRoute,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
   PhcIdRoute: PhcIdRoute,
 }
 export const routeTree = rootRouteImport
