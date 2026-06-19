@@ -127,7 +127,7 @@ function Login({ onSuccess }: { onSuccess: (t: string) => void }) {
   );
 }
 
-function Dashboard({ passcode, onLogout }: { passcode: string; onLogout: () => void }) {
+function Dashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
@@ -145,10 +145,10 @@ function Dashboard({ passcode, onLogout }: { passcode: string; onLogout: () => v
           <TabsTrigger value="articles">Health Articles</TabsTrigger>
         </TabsList>
         <TabsContent value="phcs" className="mt-6">
-          <PhcsAdmin passcode={passcode} />
+          <PhcsAdmin token={token} />
         </TabsContent>
         <TabsContent value="articles" className="mt-6">
-          <ArticlesAdmin passcode={passcode} />
+          <ArticlesAdmin token={token} />
         </TabsContent>
       </Tabs>
     </div>
@@ -171,7 +171,7 @@ const emptyPhc = {
 
 type PhcForm = typeof emptyPhc;
 
-function PhcsAdmin({ passcode }: { passcode: string }) {
+function PhcsAdmin({ token }: { token: string }) {
   const router = useRouter();
   const fetchAll = useServerFn(listAllPhcs);
   const save = useServerFn(upsertPhc);
@@ -183,7 +183,7 @@ function PhcsAdmin({ passcode }: { passcode: string }) {
 
   async function reload() {
     try {
-      const data = await fetchAll({ data: { passcode } });
+      const data = await fetchAll({ data: { token } });
       setRows(data);
     } catch (e: any) {
       toast.error(e?.message || "Failed to load");
@@ -253,7 +253,7 @@ function PhcsAdmin({ passcode }: { passcode: string }) {
   async function confirmDelete() {
     if (!confirmDel) return;
     try {
-      await remove({ data: { passcode, id: confirmDel.id } });
+      await remove({ data: { token, id: confirmDel.id } });
       toast.success("PHC deleted");
       setConfirmDel(null);
       reload();
@@ -509,7 +509,7 @@ const emptyArticle = {
 type ArticleForm = typeof emptyArticle;
 type AdminArticle = HealthArticle & { published: boolean };
 
-function ArticlesAdmin({ passcode }: { passcode: string }) {
+function ArticlesAdmin({ token }: { token: string }) {
   const router = useRouter();
   const fetchAll = useServerFn(listAllArticles);
   const save = useServerFn(upsertArticle);
@@ -521,7 +521,7 @@ function ArticlesAdmin({ passcode }: { passcode: string }) {
 
   async function reload() {
     try {
-      const data = await fetchAll({ data: { passcode } });
+      const data = await fetchAll({ data: { token } });
       setRows(data);
     } catch (e: any) {
       toast.error(e?.message || "Failed to load");
@@ -584,7 +584,7 @@ function ArticlesAdmin({ passcode }: { passcode: string }) {
   async function confirmDelete() {
     if (!confirmDel) return;
     try {
-      await remove({ data: { passcode, id: confirmDel.id } });
+      await remove({ data: { token, id: confirmDel.id } });
       toast.success("Article deleted");
       setConfirmDel(null);
       reload();
