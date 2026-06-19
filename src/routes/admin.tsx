@@ -74,7 +74,7 @@ function AdminPage() {
   }
 
   if (!token) return <Login onSuccess={setToken} />;
-  return <Dashboard token={token} onLogout={clearSession} onSessionInvalid={clearSession} />;
+  return <Dashboard token={token} onLogout={clearSession} />;
 }
 
 function Login({ onSuccess }: { onSuccess: (t: string) => void }) {
