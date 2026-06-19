@@ -58,24 +58,26 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-const STORAGE_KEY = "egor-admin-passcode";
+const STORAGE_KEY = "egor-admin-session";
 
 function AdminPage() {
-  const [passcode, setPasscode] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     const stored = sessionStorage.getItem(STORAGE_KEY);
-    if (stored) setPasscode(stored);
+    if (stored) setToken(stored);
   }, []);
 
-  if (!passcode) return <Login onSuccess={setPasscode} />;
-  return <Dashboard passcode={passcode} onLogout={() => {
+  function clearSession() {
     sessionStorage.removeItem(STORAGE_KEY);
-    setPasscode(null);
-  }} />;
+    setToken(null);
+  }
+
+  if (!token) return <Login onSuccess={setToken} />;
+  return <Dashboard token={token} onLogout={clearSession} />;
 }
 
-function Login({ onSuccess }: { onSuccess: (p: string) => void }) {
+function Login({ onSuccess }: { onSuccess: (t: string) => void }) {
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
   const verify = useServerFn(verifyAdmin);
@@ -84,11 +86,12 @@ function Login({ onSuccess }: { onSuccess: (p: string) => void }) {
     e.preventDefault();
     setLoading(true);
     try {
-      await verify({ data: { passcode: value } });
-      sessionStorage.setItem(STORAGE_KEY, value);
-      onSuccess(value);
-    } catch {
-      toast.error("Invalid passcode");
+      const { token } = await verify({ data: { passcode: value } });
+      sessionStorage.setItem(STORAGE_KEY, token);
+      setValue("");
+      onSuccess(token);
+    } catch (err: any) {
+      toast.error(err?.message || "Invalid passcode");
     } finally {
       setLoading(false);
     }
@@ -111,10 +114,8 @@ function Login({ onSuccess }: { onSuccess: (p: string) => void }) {
                 onChange={(e) => setValue(e.target.value)}
                 autoFocus
                 required
+                autoComplete="current-password"
               />
-              <p className="text-xs text-muted-foreground">
-                Default is <code>egor-admin</code>. Change by setting the <code>ADMIN_PASSCODE</code> backend secret.
-              </p>
             </div>
             <Button type="submit" disabled={loading} className="w-full">
               {loading ? "Checking…" : "Sign in"}
@@ -126,7 +127,7 @@ function Login({ onSuccess }: { onSuccess: (p: string) => void }) {
   );
 }
 
-function Dashboard({ passcode, onLogout }: { passcode: string; onLogout: () => void }) {
+function Dashboard({ token, onLogout }: { token: string; onLogout: () => void }) {
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-6 flex items-center justify-between">
@@ -144,10 +145,10 @@ function Dashboard({ passcode, onLogout }: { passcode: string; onLogout: () => v
           <TabsTrigger value="articles">Health Articles</TabsTrigger>
         </TabsList>
         <TabsContent value="phcs" className="mt-6">
-          <PhcsAdmin passcode={passcode} />
+          <PhcsAdmin token={token} />
         </TabsContent>
         <TabsContent value="articles" className="mt-6">
-          <ArticlesAdmin passcode={passcode} />
+          <ArticlesAdmin token={token} />
         </TabsContent>
       </Tabs>
     </div>
@@ -170,7 +171,7 @@ const emptyPhc = {
 
 type PhcForm = typeof emptyPhc;
 
-function PhcsAdmin({ passcode }: { passcode: string }) {
+function PhcsAdmin({ token }: { token: string }) {
   const router = useRouter();
   const fetchAll = useServerFn(listAllPhcs);
   const save = useServerFn(upsertPhc);
@@ -182,7 +183,7 @@ function PhcsAdmin({ passcode }: { passcode: string }) {
 
   async function reload() {
     try {
-      const data = await fetchAll({ data: { passcode } });
+      const data = await fetchAll({ data: { token } });
       setRows(data);
     } catch (e: any) {
       toast.error(e?.message || "Failed to load");
@@ -225,7 +226,7 @@ function PhcsAdmin({ passcode }: { passcode: string }) {
     try {
       await save({
         data: {
-          passcode,
+          token,
           id: editing.id,
           phc: {
             name: f.name,
@@ -252,7 +253,7 @@ function PhcsAdmin({ passcode }: { passcode: string }) {
   async function confirmDelete() {
     if (!confirmDel) return;
     try {
-      await remove({ data: { passcode, id: confirmDel.id } });
+      await remove({ data: { token, id: confirmDel.id } });
       toast.success("PHC deleted");
       setConfirmDel(null);
       reload();
@@ -508,7 +509,7 @@ const emptyArticle = {
 type ArticleForm = typeof emptyArticle;
 type AdminArticle = HealthArticle & { published: boolean };
 
-function ArticlesAdmin({ passcode }: { passcode: string }) {
+function ArticlesAdmin({ token }: { token: string }) {
   const router = useRouter();
   const fetchAll = useServerFn(listAllArticles);
   const save = useServerFn(upsertArticle);
@@ -520,7 +521,7 @@ function ArticlesAdmin({ passcode }: { passcode: string }) {
 
   async function reload() {
     try {
-      const data = await fetchAll({ data: { passcode } });
+      const data = await fetchAll({ data: { token } });
       setRows(data);
     } catch (e: any) {
       toast.error(e?.message || "Failed to load");
@@ -556,7 +557,7 @@ function ArticlesAdmin({ passcode }: { passcode: string }) {
     try {
       await save({
         data: {
-          passcode,
+          token,
           id: editing.id,
           article: {
             title: f.title,
@@ -583,7 +584,7 @@ function ArticlesAdmin({ passcode }: { passcode: string }) {
   async function confirmDelete() {
     if (!confirmDel) return;
     try {
-      await remove({ data: { passcode, id: confirmDel.id } });
+      await remove({ data: { token, id: confirmDel.id } });
       toast.success("Article deleted");
       setConfirmDel(null);
       reload();
