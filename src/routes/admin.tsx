@@ -58,24 +58,26 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-const STORAGE_KEY = "egor-admin-passcode";
+const STORAGE_KEY = "egor-admin-session";
 
 function AdminPage() {
-  const [passcode, setPasscode] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(null);
 
   useEffect(() => {
     const stored = sessionStorage.getItem(STORAGE_KEY);
-    if (stored) setPasscode(stored);
+    if (stored) setToken(stored);
   }, []);
 
-  if (!passcode) return <Login onSuccess={setPasscode} />;
-  return <Dashboard passcode={passcode} onLogout={() => {
+  function clearSession() {
     sessionStorage.removeItem(STORAGE_KEY);
-    setPasscode(null);
-  }} />;
+    setToken(null);
+  }
+
+  if (!token) return <Login onSuccess={setToken} />;
+  return <Dashboard token={token} onLogout={clearSession} onSessionInvalid={clearSession} />;
 }
 
-function Login({ onSuccess }: { onSuccess: (p: string) => void }) {
+function Login({ onSuccess }: { onSuccess: (t: string) => void }) {
   const [value, setValue] = useState("");
   const [loading, setLoading] = useState(false);
   const verify = useServerFn(verifyAdmin);
@@ -84,11 +86,12 @@ function Login({ onSuccess }: { onSuccess: (p: string) => void }) {
     e.preventDefault();
     setLoading(true);
     try {
-      await verify({ data: { passcode: value } });
-      sessionStorage.setItem(STORAGE_KEY, value);
-      onSuccess(value);
-    } catch {
-      toast.error("Invalid passcode");
+      const { token } = await verify({ data: { passcode: value } });
+      sessionStorage.setItem(STORAGE_KEY, token);
+      setValue("");
+      onSuccess(token);
+    } catch (err: any) {
+      toast.error(err?.message || "Invalid passcode");
     } finally {
       setLoading(false);
     }
@@ -111,10 +114,8 @@ function Login({ onSuccess }: { onSuccess: (p: string) => void }) {
                 onChange={(e) => setValue(e.target.value)}
                 autoFocus
                 required
+                autoComplete="current-password"
               />
-              <p className="text-xs text-muted-foreground">
-                Default is <code>egor-admin</code>. Change by setting the <code>ADMIN_PASSCODE</code> backend secret.
-              </p>
             </div>
             <Button type="submit" disabled={loading} className="w-full">
               {loading ? "Checking…" : "Sign in"}
