@@ -226,7 +226,7 @@ function PhcsAdmin({ token }: { token: string }) {
     try {
       await save({
         data: {
-          passcode,
+          token,
           id: editing.id,
           phc: {
             name: f.name,
@@ -557,7 +557,7 @@ function ArticlesAdmin({ token }: { token: string }) {
     try {
       await save({
         data: {
-          passcode,
+          token,
           id: editing.id,
           article: {
             title: f.title,
