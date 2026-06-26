@@ -2,16 +2,16 @@ import { Link } from "@tanstack/react-router";
 import { MapPin, Clock, Phone, ArrowRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import type { PHC } from "@/lib/types";
-import { isOpenNow } from "@/lib/types";
+import { isOpenLagos, nowLagos, dayServices, formatTime, DAY_LABELS } from "@/lib/types";
 
 export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | null }) {
-  const open = isOpenNow(phc.operating_hours);
-  const todayHours =
-    new Date().getDay() === 0
-      ? phc.operating_hours.sun
-      : new Date().getDay() === 6
-      ? phc.operating_hours.sat
-      : phc.operating_hours.mon_fri;
+  const open = isOpenLagos(phc.opening_time, phc.closing_time);
+  const { dayKey } = nowLagos();
+  const today = dayServices(phc, dayKey);
+  const hoursLabel =
+    phc.opening_time && phc.closing_time
+      ? `${formatTime(phc.opening_time)} – ${formatTime(phc.closing_time)}`
+      : null;
 
   return (
     <Link
@@ -39,7 +39,7 @@ export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | n
       </div>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
-        {phc.services.slice(0, 4).map((s) => (
+        {(today.length > 0 ? today : phc.services).slice(0, 4).map((s) => (
           <span
             key={s}
             className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary"
@@ -47,17 +47,17 @@ export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | n
             {s}
           </span>
         ))}
-        {phc.services.length > 4 && (
+        {(today.length > 0 ? today : phc.services).length > 4 && (
           <span className="rounded-full bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-            +{phc.services.length - 4} more
+            +{(today.length > 0 ? today : phc.services).length - 4} more
           </span>
         )}
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-        {todayHours && (
+        {hoursLabel && (
           <span className="flex items-center gap-1">
-            <Clock className="h-3.5 w-3.5" /> Today: {todayHours}
+            <Clock className="h-3.5 w-3.5" /> {DAY_LABELS[dayKey]}: {hoursLabel}
           </span>
         )}
         {phc.contact_phone && (
