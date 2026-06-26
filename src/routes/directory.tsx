@@ -16,7 +16,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SERVICE_CATEGORIES, isOpenNow } from "@/lib/types";
+import { SERVICE_CATEGORIES, isOpenLagos } from "@/lib/types";
 
 const searchSchema = z.object({
   q: z.string().optional(),
@@ -75,7 +75,7 @@ function Directory() {
     }
     if (service !== "all") list = list.filter((p) => p.services.includes(service));
     if (ward !== "all") list = list.filter((p) => p.ward === ward);
-    if (openOnly) list = list.filter((p) => isOpenNow(p.operating_hours));
+    if (openOnly) list = list.filter((p) => isOpenLagos(p.opening_time, p.closing_time));
     list = [...list].sort((a, b) =>
       sort === "name" ? a.name.localeCompare(b.name) : a.ward.localeCompare(b.ward),
     );

@@ -1,3 +1,33 @@
+export type DayKey =
+  | "monday"
+  | "tuesday"
+  | "wednesday"
+  | "thursday"
+  | "friday"
+  | "saturday"
+  | "sunday";
+
+export const DAY_KEYS: DayKey[] = [
+  "monday",
+  "tuesday",
+  "wednesday",
+  "thursday",
+  "friday",
+  "saturday",
+  "sunday",
+];
+
+export const DAY_LABELS: Record<DayKey, string> = {
+  monday: "Monday",
+  tuesday: "Tuesday",
+  wednesday: "Wednesday",
+  thursday: "Thursday",
+  friday: "Friday",
+  saturday: "Saturday",
+  sunday: "Sunday",
+};
+
+// Legacy operating-hours shape (still on existing rows; kept for compatibility).
 export type OperatingHours = {
   mon_fri?: string;
   sat?: string;
@@ -9,14 +39,27 @@ export type PHC = {
   name: string;
   address: string;
   ward: string;
-  services: string[];
-  operating_hours: OperatingHours;
+  facility_type: string | null;
   contact_phone: string | null;
   latitude: number | null;
   longitude: number | null;
+  image_url: string | null;
   images: string[];
-  status: string;
+  google_maps_url: string | null;
+  services: string[];
+  monday_services: string[];
+  tuesday_services: string[];
+  wednesday_services: string[];
+  thursday_services: string[];
+  friday_services: string[];
+  saturday_services: string[];
+  sunday_services: string[];
+  opening_time: string | null; // "HH:MM:SS"
+  closing_time: string | null;
+  operating_hours: OperatingHours; // legacy
+  updated_at: string;
   last_updated: string;
+  created_at?: string;
 };
 
 export type HealthArticle = {
@@ -36,6 +79,10 @@ export const SERVICE_CATEGORIES = [
   "Child Welfare",
   "Malaria Treatment",
   "HIV Services",
+  "Routine Consultation",
+  "Nutrition Clinic",
+  "HIV Counselling",
+  "Tuberculosis Screening",
 ] as const;
 
 export const HEALTH_CATEGORIES = [
@@ -49,19 +96,77 @@ export const HEALTH_CATEGORIES = [
   "Hygiene and Sanitation",
 ] as const;
 
-export function isOpenNow(hours: OperatingHours, now: Date = new Date()): boolean {
-  const day = now.getDay(); // 0 Sun, 6 Sat
-  let range: string | undefined;
-  if (day === 0) range = hours.sun;
-  else if (day === 6) range = hours.sat;
-  else range = hours.mon_fri;
-  if (!range || !/^\d/.test(range)) return false;
-  const [start, end] = range.split("-");
-  if (!start || !end) return false;
-  const cur = now.getHours() * 60 + now.getMinutes();
-  const [sh, sm] = start.split(":").map(Number);
-  const [eh, em] = end.split(":").map(Number);
-  return cur >= sh * 60 + sm && cur <= eh * 60 + em;
+// --- Africa/Lagos time helpers ---
+export function nowLagos(): { dayKey: DayKey; minutes: number } {
+  const fmt = new Intl.DateTimeFormat("en-GB", {
+    timeZone: "Africa/Lagos",
+    weekday: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+  const parts = Object.fromEntries(
+    fmt.formatToParts(new Date()).map((p) => [p.type, p.value]),
+  );
+  const wd = (parts.weekday ?? "Mon").toLowerCase();
+  const map: Record<string, DayKey> = {
+    mon: "monday",
+    tue: "tuesday",
+    wed: "wednesday",
+    thu: "thursday",
+    fri: "friday",
+    sat: "saturday",
+    sun: "sunday",
+  };
+  const dayKey = map[wd.slice(0, 3)] ?? "monday";
+  const hh = Number(parts.hour ?? "0");
+  const mm = Number(parts.minute ?? "0");
+  return { dayKey, minutes: hh * 60 + mm };
+}
+
+function parseTimeToMinutes(t: string | null | undefined): number | null {
+  if (!t) return null;
+  const m = /^(\d{1,2}):(\d{2})/.exec(t);
+  if (!m) return null;
+  return Number(m[1]) * 60 + Number(m[2]);
+}
+
+export function isOpenLagos(
+  opening_time: string | null | undefined,
+  closing_time: string | null | undefined,
+): boolean {
+  const open = parseTimeToMinutes(opening_time);
+  const close = parseTimeToMinutes(closing_time);
+  if (open == null || close == null) return false;
+  const { minutes } = nowLagos();
+  return minutes >= open && minutes <= close;
+}
+
+export function formatTime(t: string | null | undefined): string {
+  const m = parseTimeToMinutes(t);
+  if (m == null) return "—";
+  const h = Math.floor(m / 60);
+  const mins = m % 60;
+  const period = h >= 12 ? "PM" : "AM";
+  const h12 = ((h + 11) % 12) + 1;
+  return `${h12}:${mins.toString().padStart(2, "0")} ${period}`;
+}
+
+export function dayServices(phc: PHC, day: DayKey): string[] {
+  switch (day) {
+    case "monday": return phc.monday_services ?? [];
+    case "tuesday": return phc.tuesday_services ?? [];
+    case "wednesday": return phc.wednesday_services ?? [];
+    case "thursday": return phc.thursday_services ?? [];
+    case "friday": return phc.friday_services ?? [];
+    case "saturday": return phc.saturday_services ?? [];
+    case "sunday": return phc.sunday_services ?? [];
+  }
+}
+
+// Legacy compatibility shim (existing callers).
+export function isOpenNow(_hours: OperatingHours | null | undefined): boolean {
+  return false;
 }
 
 export function haversineKm(

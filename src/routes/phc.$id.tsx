@@ -1,10 +1,10 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { MapPin, Phone, Clock, Navigation, MessageSquarePlus, ArrowLeft, CheckCircle2 } from "lucide-react";
+import { MapPin, Phone, Clock, Navigation, MessageSquarePlus, ArrowLeft, CheckCircle2, Calendar } from "lucide-react";
 import { getPhc } from "@/lib/phcs.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { isOpenNow, type PHC } from "@/lib/types";
+import { isOpenLagos, formatTime, dayServices, DAY_KEYS, DAY_LABELS, nowLagos, type PHC } from "@/lib/types";
 
 export const Route = createFileRoute("/phc/$id")({
   loader: async ({ context, params }) => {
@@ -23,11 +23,12 @@ export const Route = createFileRoute("/phc/$id")({
         {
           name: "description",
           content: phc
-            ? `${phc.name} in ${phc.ward} ward. Services, hours and directions for this Primary Healthcare Centre in Egor LGA.`
+            ? `${phc.name} in ${phc.ward} ward. Weekly clinic schedule, hours and directions for this Primary Healthcare Centre in Egor LGA.`
             : "Primary Healthcare Centre details.",
         },
         { property: "og:title", content: phc?.name ?? "PHC details" },
         { property: "og:description", content: phc?.address ?? "" },
+        ...(phc?.image_url ? [{ property: "og:image", content: phc.image_url }] : []),
       ],
     };
   },
@@ -56,44 +57,53 @@ function PhcDetails() {
   });
   if (!phc) return null;
 
-  const open = isOpenNow(phc.operating_hours);
-  const mapQuery =
-    phc.latitude && phc.longitude
-      ? `${phc.latitude},${phc.longitude}`
-      : encodeURIComponent(`${phc.name}, ${phc.address}, Egor LGA, Edo State, Nigeria`);
-  const mapsLink = `https://www.google.com/maps/search/?api=1&query=${mapQuery}`;
-  const directionsLink = `https://www.google.com/maps/dir/?api=1&destination=${mapQuery}`;
-  const embedSrc = `https://www.google.com/maps?q=${mapQuery}&output=embed`;
+  const open = isOpenLagos(phc.opening_time, phc.closing_time);
+  const { dayKey: todayKey } = nowLagos();
+
+  const fallbackMapQuery = phc.latitude && phc.longitude
+    ? `${phc.latitude},${phc.longitude}`
+    : encodeURIComponent(`${phc.name}, ${phc.address}, Egor LGA, Edo State, Nigeria`);
+  const mapsLink = phc.google_maps_url || `https://www.google.com/maps/search/?api=1&query=${fallbackMapQuery}`;
+  const directionsLink = `https://www.google.com/maps/dir/?api=1&destination=${fallbackMapQuery}`;
+  const embedSrc = `https://www.google.com/maps?q=${fallbackMapQuery}&output=embed`;
+
+  const hoursLabel = phc.opening_time && phc.closing_time
+    ? `${formatTime(phc.opening_time)} – ${formatTime(phc.closing_time)}`
+    : "Hours not set";
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 md:py-10">
-      <Link
-        to="/directory"
-        className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground"
-      >
+      <Link to="/directory" className="inline-flex items-center text-sm text-muted-foreground hover:text-foreground">
         <ArrowLeft className="mr-1 h-4 w-4" /> Back to directory
       </Link>
+
+      {phc.image_url && (
+        <img
+          src={phc.image_url}
+          alt={phc.name}
+          className="mt-4 h-56 w-full rounded-xl object-cover"
+          loading="lazy"
+        />
+      )}
 
       <div className="mt-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-foreground md:text-3xl">{phc.name}</h1>
           <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
             <MapPin className="h-4 w-4" /> {phc.address} · {phc.ward} Ward
+            {phc.facility_type ? ` · ${phc.facility_type}` : ""}
           </p>
         </div>
         <Badge
           variant="outline"
-          className={
-            open
-              ? "border-success/30 bg-success/10 text-success"
-              : "border-muted-foreground/20 bg-muted text-muted-foreground"
-          }
+          className={open
+            ? "border-success/30 bg-success/10 text-success"
+            : "border-muted-foreground/20 bg-muted text-muted-foreground"}
         >
           {open ? "Open now" : "Closed"}
         </Badge>
       </div>
 
-      {/* Action buttons */}
       <div className="mt-5 flex flex-wrap gap-2">
         <Button asChild className="h-11">
           <a href={directionsLink} target="_blank" rel="noopener noreferrer">
@@ -121,12 +131,45 @@ function PhcDetails() {
 
       <div className="mt-8 grid gap-6 md:grid-cols-3">
         <div className="space-y-6 md:col-span-2">
-          {/* Services */}
+          {/* Weekly schedule */}
           <section className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
-            <h2 className="text-base font-semibold text-card-foreground">Services offered</h2>
-            {phc.services.length === 0 ? (
-              <p className="mt-2 text-sm text-muted-foreground">No service list available.</p>
-            ) : (
+            <h2 className="flex items-center gap-2 text-base font-semibold text-card-foreground">
+              <Calendar className="h-4 w-4" /> Weekly clinic schedule
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Daily hours: <span className="font-medium text-foreground">{hoursLabel}</span> (Africa/Lagos time)
+            </p>
+            <ul className="mt-4 divide-y divide-border">
+              {DAY_KEYS.map((d) => {
+                const list = dayServices(phc, d);
+                const isToday = d === todayKey;
+                return (
+                  <li key={d} className={`flex flex-col gap-1 py-3 sm:flex-row sm:items-start sm:gap-4 ${isToday ? "bg-primary-soft/40 -mx-2 px-2 rounded" : ""}`}>
+                    <div className="w-32 shrink-0 text-sm font-medium text-foreground">
+                      {DAY_LABELS[d]}
+                      {isToday && <span className="ml-2 text-xs text-primary">(today)</span>}
+                    </div>
+                    {list.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No scheduled clinic</p>
+                    ) : (
+                      <ul className="flex flex-wrap gap-1.5">
+                        {list.map((s) => (
+                          <li key={s} className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary">
+                            <CheckCircle2 className="h-3 w-3" /> {s}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          </section>
+
+          {/* General services */}
+          {phc.services && phc.services.length > 0 && (
+            <section className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
+              <h2 className="text-base font-semibold text-card-foreground">General services offered</h2>
               <ul className="mt-3 grid gap-2 sm:grid-cols-2">
                 {phc.services.map((s) => (
                   <li key={s} className="flex items-center gap-2 text-sm text-foreground">
@@ -134,8 +177,8 @@ function PhcDetails() {
                   </li>
                 ))}
               </ul>
-            )}
-          </section>
+            </section>
+          )}
 
           {/* Map */}
           <section className="overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-card)]">
@@ -160,16 +203,14 @@ function PhcDetails() {
         </div>
 
         <aside className="space-y-6">
-          {/* Schedule */}
           <section className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
             <h2 className="flex items-center gap-2 text-base font-semibold text-card-foreground">
-              <Clock className="h-4 w-4" /> Clinic schedule
+              <Clock className="h-4 w-4" /> Daily hours
             </h2>
-            <dl className="mt-3 space-y-2 text-sm">
-              <ScheduleRow label="Mon – Fri" value={phc.operating_hours.mon_fri} />
-              <ScheduleRow label="Saturday" value={phc.operating_hours.sat} />
-              <ScheduleRow label="Sunday" value={phc.operating_hours.sun} />
-            </dl>
+            <p className="mt-2 text-sm text-foreground">{hoursLabel}</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Open/Closed updates live in Africa/Lagos time.
+            </p>
           </section>
 
           <section className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
@@ -189,15 +230,6 @@ function PhcDetails() {
           </section>
         </aside>
       </div>
-    </div>
-  );
-}
-
-function ScheduleRow({ label, value }: { label: string; value?: string }) {
-  return (
-    <div className="flex justify-between gap-3">
-      <dt className="text-muted-foreground">{label}</dt>
-      <dd className="font-medium text-foreground">{value ?? "Not available"}</dd>
     </div>
   );
 }

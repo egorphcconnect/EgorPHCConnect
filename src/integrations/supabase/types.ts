@@ -97,54 +97,87 @@ export type Database = {
       phcs: {
         Row: {
           address: string
+          closing_time: string | null
           contact_phone: string | null
           created_at: string
           facility_type: string | null
+          friday_services: string[]
+          google_maps_url: string | null
           id: string
           image_url: string | null
           images: string[]
           last_updated: string
           latitude: number | null
           longitude: number | null
+          monday_services: string[]
           name: string
+          opening_time: string | null
           operating_hours: Json
+          saturday_services: string[]
           services: string[]
           status: string
+          sunday_services: string[]
+          thursday_services: string[]
+          tuesday_services: string[]
+          updated_at: string
           ward: string
+          wednesday_services: string[]
         }
         Insert: {
           address: string
+          closing_time?: string | null
           contact_phone?: string | null
           created_at?: string
           facility_type?: string | null
+          friday_services?: string[]
+          google_maps_url?: string | null
           id?: string
           image_url?: string | null
           images?: string[]
           last_updated?: string
           latitude?: number | null
           longitude?: number | null
+          monday_services?: string[]
           name: string
+          opening_time?: string | null
           operating_hours?: Json
+          saturday_services?: string[]
           services?: string[]
           status?: string
+          sunday_services?: string[]
+          thursday_services?: string[]
+          tuesday_services?: string[]
+          updated_at?: string
           ward: string
+          wednesday_services?: string[]
         }
         Update: {
           address?: string
+          closing_time?: string | null
           contact_phone?: string | null
           created_at?: string
           facility_type?: string | null
+          friday_services?: string[]
+          google_maps_url?: string | null
           id?: string
           image_url?: string | null
           images?: string[]
           last_updated?: string
           latitude?: number | null
           longitude?: number | null
+          monday_services?: string[]
           name?: string
+          opening_time?: string | null
           operating_hours?: Json
+          saturday_services?: string[]
           services?: string[]
           status?: string
+          sunday_services?: string[]
+          thursday_services?: string[]
+          tuesday_services?: string[]
+          updated_at?: string
           ward?: string
+          wednesday_services?: string[]
         }
         Relationships: []
       }
