@@ -16,7 +16,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
-import { SERVICE_CATEGORIES, isOpenNow } from "@/lib/types";
+import { SERVICE_CATEGORIES, isOpenLagos } from "@/lib/types";
 
 const searchSchema = z.object({
   q: z.string().optional(),
