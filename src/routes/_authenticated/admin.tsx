@@ -8,8 +8,11 @@ import {
 
 import { supabase } from "@/integrations/supabase/client";
 import { claimFirstAdmin } from "@/lib/admin-bootstrap.functions";
-import type { PHC, HealthArticle, OperatingHours } from "@/lib/types";
-import { SERVICE_CATEGORIES, HEALTH_CATEGORIES } from "@/lib/types";
+import type { PHC, HealthArticle, DayKey } from "@/lib/types";
+import {
+  SERVICE_CATEGORIES, HEALTH_CATEGORIES,
+  isOpenLagos, formatTime, DAY_KEYS, DAY_LABELS, dayServices,
+} from "@/lib/types";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,7 +24,7 @@ import {
   Table, TableHeader, TableBody, TableRow, TableHead, TableCell,
 } from "@/components/ui/table";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from "@/components/ui/dialog";
 import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
@@ -40,30 +43,6 @@ export const Route = createFileRoute("/_authenticated/admin")({
 
 const FACILITY_TYPES = ["Primary Health Centre", "Health Post", "Comprehensive Health Centre", "Maternity"];
 
-// ---- Open/Closed (Africa/Lagos) ----
-function nowLagosParts() {
-  const fmt = new Intl.DateTimeFormat("en-GB", {
-    timeZone: "Africa/Lagos",
-    weekday: "short", hour: "2-digit", minute: "2-digit", hour12: false,
-  });
-  const parts = Object.fromEntries(fmt.formatToParts(new Date()).map((p) => [p.type, p.value]));
-  const wd = (parts.weekday ?? "Mon").toLowerCase();
-  const day = wd.startsWith("sun") ? 0 : wd.startsWith("sat") ? 6 : 1;
-  const minutes = Number(parts.hour) * 60 + Number(parts.minute);
-  return { day, minutes };
-}
-function isOpenLagos(hours: OperatingHours | null | undefined): boolean {
-  if (!hours) return false;
-  const { day, minutes } = nowLagosParts();
-  const range = day === 0 ? hours.sun : day === 6 ? hours.sat : hours.mon_fri;
-  if (!range || !/^\d/.test(range)) return false;
-  const [s, e] = range.split("-");
-  if (!s || !e) return false;
-  const [sh, sm] = s.split(":").map(Number);
-  const [eh, em] = e.split(":").map(Number);
-  return minutes >= sh * 60 + sm && minutes <= eh * 60 + em;
-}
-
 function AdminPage() {
   const navigate = useNavigate();
   const claim = useServerFn(claimFirstAdmin);
@@ -80,7 +59,6 @@ function AdminPage() {
         .from("user_roles").select("role").eq("user_id", u.user.id);
       const admin = (roles ?? []).some((r) => r.role === "admin");
       if (!admin) {
-        // try to claim if no admins exist
         try {
           const r = await claim();
           if (r.claimed) { setIsAdmin(true); toast.success("You are the first administrator."); }
@@ -148,25 +126,23 @@ function AdminPage() {
 }
 
 // =================== PHC MANAGER ===================
-type PhcWithExtras = PHC & { facility_type: string | null; image_url: string | null };
-
 function PhcManager() {
-  const [rows, setRows] = useState<PhcWithExtras[]>([]);
+  const [rows, setRows] = useState<PHC[]>([]);
   const [loading, setLoading] = useState(true);
   const [q, setQ] = useState("");
   const [ward, setWard] = useState<string>("all");
   const [ftype, setFtype] = useState<string>("all");
   const [openFilter, setOpenFilter] = useState<string>("all");
-  const [editing, setEditing] = useState<PhcWithExtras | null>(null);
+  const [editing, setEditing] = useState<PHC | null>(null);
   const [adding, setAdding] = useState(false);
-  const [deleting, setDeleting] = useState<PhcWithExtras | null>(null);
-  const [viewing, setViewing] = useState<PhcWithExtras | null>(null);
+  const [deleting, setDeleting] = useState<PHC | null>(null);
+  const [viewing, setViewing] = useState<PHC | null>(null);
 
   async function load() {
     setLoading(true);
     const { data, error } = await supabase.from("phcs").select("*").order("name");
     if (error) toast.error(error.message);
-    setRows((data ?? []) as unknown as PhcWithExtras[]);
+    setRows((data ?? []) as unknown as PHC[]);
     setLoading(false);
   }
   useEffect(() => { load(); }, []);
@@ -182,14 +158,14 @@ function PhcManager() {
     if (ward !== "all" && r.ward !== ward) return false;
     if (ftype !== "all" && r.facility_type !== ftype) return false;
     if (openFilter !== "all") {
-      const open = isOpenLagos(r.operating_hours);
+      const open = isOpenLagos(r.opening_time, r.closing_time);
       if (openFilter === "open" && !open) return false;
       if (openFilter === "closed" && open) return false;
     }
     return true;
   });
 
-  const totalActive = rows.filter((r) => r.status === "active").length;
+  const openNowCount = rows.filter((r) => isOpenLagos(r.opening_time, r.closing_time)).length;
 
   async function onDelete() {
     if (!deleting) return;
@@ -202,7 +178,7 @@ function PhcManager() {
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Card><CardHeader className="pb-2"><CardDescription>Total PHCs</CardDescription><CardTitle className="text-3xl">{rows.length}</CardTitle></CardHeader></Card>
-        <Card><CardHeader className="pb-2"><CardDescription>Active</CardDescription><CardTitle className="text-3xl">{totalActive}</CardTitle></CardHeader></Card>
+        <Card><CardHeader className="pb-2"><CardDescription>Open right now</CardDescription><CardTitle className="text-3xl">{openNowCount}</CardTitle></CardHeader></Card>
         <Card>
           <CardHeader className="pb-2"><CardDescription>Quick actions</CardDescription></CardHeader>
           <CardContent className="flex flex-wrap gap-2">
@@ -254,7 +230,7 @@ function PhcManager() {
                   <TableHead>Name</TableHead>
                   <TableHead>Ward</TableHead>
                   <TableHead>Type</TableHead>
-                  <TableHead className="hidden md:table-cell">Hours (Mon–Fri)</TableHead>
+                  <TableHead className="hidden md:table-cell">Hours</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead className="hidden md:table-cell">Updated</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -262,18 +238,20 @@ function PhcManager() {
               </TableHeader>
               <TableBody>
                 {filtered.map((p) => {
-                  const open = isOpenLagos(p.operating_hours);
+                  const open = isOpenLagos(p.opening_time, p.closing_time);
                   return (
                     <TableRow key={p.id}>
                       <TableCell className="font-medium">{p.name}</TableCell>
                       <TableCell>{p.ward}</TableCell>
                       <TableCell className="text-muted-foreground">{p.facility_type ?? "—"}</TableCell>
-                      <TableCell className="hidden md:table-cell text-muted-foreground">{p.operating_hours?.mon_fri ?? "—"}</TableCell>
+                      <TableCell className="hidden md:table-cell text-muted-foreground">
+                        {p.opening_time && p.closing_time ? `${formatTime(p.opening_time)} – ${formatTime(p.closing_time)}` : "—"}
+                      </TableCell>
                       <TableCell>
                         <Badge variant={open ? "default" : "secondary"}>{open ? "Open now" : "Closed"}</Badge>
                       </TableCell>
                       <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
-                        {new Date(p.last_updated).toLocaleDateString()}
+                        {new Date(p.updated_at ?? p.last_updated).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="inline-flex gap-1">
@@ -315,7 +293,7 @@ function PhcManager() {
       </AlertDialog>
 
       <Dialog open={!!viewing} onOpenChange={(o) => !o && setViewing(null)}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-h-[90vh] max-w-lg overflow-y-auto">
           <DialogHeader><DialogTitle>{viewing?.name}</DialogTitle></DialogHeader>
           {viewing && (
             <div className="space-y-2 text-sm">
@@ -324,9 +302,20 @@ function PhcManager() {
               <p><b>Type:</b> {viewing.facility_type ?? "—"}</p>
               <p><b>Address:</b> {viewing.address}</p>
               <p><b>Phone:</b> {viewing.contact_phone ?? "—"}</p>
-              <p><b>Hours:</b> Mon–Fri {viewing.operating_hours?.mon_fri ?? "—"}, Sat {viewing.operating_hours?.sat ?? "—"}, Sun {viewing.operating_hours?.sun ?? "—"}</p>
-              <p><b>Services:</b> {viewing.services?.join(", ") || "—"}</p>
+              <p><b>Hours:</b> {viewing.opening_time && viewing.closing_time ? `${formatTime(viewing.opening_time)} – ${formatTime(viewing.closing_time)}` : "—"}</p>
               <p><b>Coords:</b> {viewing.latitude ?? "—"}, {viewing.longitude ?? "—"}</p>
+              {viewing.google_maps_url && <p><b>Maps:</b> <a className="text-primary underline" href={viewing.google_maps_url} target="_blank" rel="noreferrer">Open</a></p>}
+              <div>
+                <b>Weekly schedule:</b>
+                <ul className="mt-1 space-y-1">
+                  {DAY_KEYS.map((d) => {
+                    const list = dayServices(viewing, d);
+                    return (
+                      <li key={d}><span className="font-medium">{DAY_LABELS[d]}:</span> {list.length ? list.join(", ") : <span className="text-muted-foreground">No scheduled clinic</span>}</li>
+                    );
+                  })}
+                </ul>
+              </div>
             </div>
           )}
         </DialogContent>
@@ -335,13 +324,47 @@ function PhcManager() {
   );
 }
 
+type PhcFormState = {
+  name: string;
+  address: string;
+  ward: string;
+  facility_type: string;
+  contact_phone: string;
+  latitude: string;
+  longitude: string;
+  google_maps_url: string;
+  opening_time: string;
+  closing_time: string;
+  services: string[];
+  image_url: string;
+  daySvc: Record<DayKey, string[]>;
+};
+
+function emptyDaySvc(phc: PHC | null): Record<DayKey, string[]> {
+  return {
+    monday: phc?.monday_services ?? [],
+    tuesday: phc?.tuesday_services ?? [],
+    wednesday: phc?.wednesday_services ?? [],
+    thursday: phc?.thursday_services ?? [],
+    friday: phc?.friday_services ?? [],
+    saturday: phc?.saturday_services ?? [],
+    sunday: phc?.sunday_services ?? [],
+  };
+}
+
+function toTimeInput(t: string | null | undefined): string {
+  if (!t) return "";
+  const m = /^(\d{2}):(\d{2})/.exec(t);
+  return m ? `${m[1]}:${m[2]}` : "";
+}
+
 function PhcForm({ phc, onClose, onSaved }: {
-  phc: PhcWithExtras | null;
+  phc: PHC | null;
   onClose: () => void;
   onSaved: () => void;
 }) {
   const editing = !!phc;
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<PhcFormState>({
     name: phc?.name ?? "",
     address: phc?.address ?? "",
     ward: phc?.ward ?? "",
@@ -349,12 +372,12 @@ function PhcForm({ phc, onClose, onSaved }: {
     contact_phone: phc?.contact_phone ?? "",
     latitude: phc?.latitude?.toString() ?? "",
     longitude: phc?.longitude?.toString() ?? "",
-    mon_fri: phc?.operating_hours?.mon_fri ?? "08:00-16:00",
-    sat: phc?.operating_hours?.sat ?? "09:00-13:00",
-    sun: phc?.operating_hours?.sun ?? "Closed",
-    status: phc?.status ?? "active",
+    google_maps_url: phc?.google_maps_url ?? "",
+    opening_time: toTimeInput(phc?.opening_time) || "08:00",
+    closing_time: toTimeInput(phc?.closing_time) || "16:00",
     services: phc?.services ?? [],
     image_url: phc?.image_url ?? "",
+    daySvc: emptyDaySvc(phc),
   });
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -366,7 +389,16 @@ function PhcForm({ phc, onClose, onSaved }: {
     }));
   }
 
+  function toggleDayService(day: DayKey, s: string, on: boolean) {
+    setForm((f) => {
+      const cur = f.daySvc[day] ?? [];
+      const next = on ? Array.from(new Set([...cur, s])) : cur.filter((x) => x !== s);
+      return { ...f, daySvc: { ...f.daySvc, [day]: next } };
+    });
+  }
+
   async function handleImage(file: File) {
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5 MB"); return; }
     setUploading(true);
     const path = `${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
     const { error } = await supabase.storage.from("phc-images").upload(path, file, { upsert: false });
@@ -382,6 +414,14 @@ function PhcForm({ phc, onClose, onSaved }: {
     if (!form.name.trim() || !form.address.trim() || !form.ward.trim()) {
       toast.error("Name, address and ward are required"); return;
     }
+    if (form.opening_time >= form.closing_time) {
+      toast.error("Closing time must be after opening time"); return;
+    }
+    const lat = form.latitude ? Number(form.latitude) : null;
+    const lng = form.longitude ? Number(form.longitude) : null;
+    if (lat != null && (isNaN(lat) || lat < -90 || lat > 90)) { toast.error("Invalid latitude"); return; }
+    if (lng != null && (isNaN(lng) || lng < -180 || lng > 180)) { toast.error("Invalid longitude"); return; }
+
     setSaving(true);
     const payload = {
       name: form.name.trim(),
@@ -389,12 +429,20 @@ function PhcForm({ phc, onClose, onSaved }: {
       ward: form.ward.trim(),
       facility_type: form.facility_type || null,
       contact_phone: form.contact_phone.trim() || null,
-      latitude: form.latitude ? Number(form.latitude) : null,
-      longitude: form.longitude ? Number(form.longitude) : null,
-      operating_hours: { mon_fri: form.mon_fri, sat: form.sat, sun: form.sun },
-      status: form.status,
+      latitude: lat,
+      longitude: lng,
+      google_maps_url: form.google_maps_url.trim() || null,
+      opening_time: form.opening_time,
+      closing_time: form.closing_time,
       services: form.services,
       image_url: form.image_url || null,
+      monday_services: form.daySvc.monday,
+      tuesday_services: form.daySvc.tuesday,
+      wednesday_services: form.daySvc.wednesday,
+      thursday_services: form.daySvc.thursday,
+      friday_services: form.daySvc.friday,
+      saturday_services: form.daySvc.saturday,
+      sunday_services: form.daySvc.sunday,
       last_updated: new Date().toISOString(),
     };
     const { error } = editing
@@ -407,7 +455,7 @@ function PhcForm({ phc, onClose, onSaved }: {
 
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()}>
-      <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+      <DialogContent className="max-h-[90vh] max-w-3xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{editing ? "Edit PHC" : "Add new PHC"}</DialogTitle>
         </DialogHeader>
@@ -421,41 +469,53 @@ function PhcForm({ phc, onClose, onSaved }: {
                 <SelectContent>{FACILITY_TYPES.map((t) => <SelectItem key={t} value={t}>{t}</SelectItem>)}</SelectContent>
               </Select>
             </Field>
-            <Field label="Status">
-              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                </SelectContent>
-              </Select>
-            </Field>
+            <Field label="Phone"><Input value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} placeholder="+234 800 000 0000" /></Field>
           </div>
           <Field label="Address *"><Textarea rows={2} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} required /></Field>
+
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Field label="Opening time *"><Input type="time" value={form.opening_time} onChange={(e) => setForm({ ...form, opening_time: e.target.value })} required /></Field>
+            <Field label="Closing time *"><Input type="time" value={form.closing_time} onChange={(e) => setForm({ ...form, closing_time: e.target.value })} required /></Field>
+          </div>
+          <p className="text-xs text-muted-foreground">Open/Closed status is calculated live in Africa/Lagos time.</p>
+
           <div className="grid gap-3 sm:grid-cols-3">
-            <Field label="Phone"><Input value={form.contact_phone} onChange={(e) => setForm({ ...form, contact_phone: e.target.value })} /></Field>
-            <Field label="Latitude"><Input value={form.latitude} onChange={(e) => setForm({ ...form, latitude: e.target.value })} /></Field>
-            <Field label="Longitude"><Input value={form.longitude} onChange={(e) => setForm({ ...form, longitude: e.target.value })} /></Field>
+            <Field label="Latitude"><Input value={form.latitude} onChange={(e) => setForm({ ...form, latitude: e.target.value })} placeholder="6.3811" /></Field>
+            <Field label="Longitude"><Input value={form.longitude} onChange={(e) => setForm({ ...form, longitude: e.target.value })} placeholder="5.5702" /></Field>
+            <Field label="Google Maps URL"><Input value={form.google_maps_url} onChange={(e) => setForm({ ...form, google_maps_url: e.target.value })} placeholder="https://maps.app.goo.gl/…" /></Field>
           </div>
 
           <div className="space-y-2">
-            <Label>Operating hours (24h, e.g. 08:00-16:00 or "Closed")</Label>
-            <div className="grid gap-2 sm:grid-cols-3">
-              <Input placeholder="Mon–Fri" value={form.mon_fri} onChange={(e) => setForm({ ...form, mon_fri: e.target.value })} />
-              <Input placeholder="Saturday" value={form.sat} onChange={(e) => setForm({ ...form, sat: e.target.value })} />
-              <Input placeholder="Sunday" value={form.sun} onChange={(e) => setForm({ ...form, sun: e.target.value })} />
-            </div>
-            <p className="text-xs text-muted-foreground">Open/Closed status is calculated live in Africa/Lagos time.</p>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Services offered</Label>
+            <Label>General services offered</Label>
             <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
               {SERVICE_CATEGORIES.map((s) => (
                 <label key={s} className="flex items-center gap-2 text-sm">
                   <Checkbox checked={form.services.includes(s)} onCheckedChange={(v) => toggleService(s, !!v)} />
                   {s}
                 </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2 rounded-lg border border-border p-3">
+            <Label className="text-sm font-semibold">Weekly clinic schedule</Label>
+            <p className="text-xs text-muted-foreground">Tick the clinics offered on each day. Days with no ticks display as "No scheduled clinic".</p>
+            <div className="space-y-3">
+              {DAY_KEYS.map((d) => (
+                <div key={d} className="rounded border border-border/60 p-2">
+                  <div className="mb-1 text-sm font-medium">{DAY_LABELS[d]}</div>
+                  <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
+                    {SERVICE_CATEGORIES.map((s) => (
+                      <label key={s} className="flex items-center gap-2 text-xs">
+                        <Checkbox
+                          checked={form.daySvc[d].includes(s)}
+                          onCheckedChange={(v) => toggleDayService(d, s, !!v)}
+                        />
+                        {s}
+                      </label>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
