@@ -10,9 +10,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { claimFirstAdmin } from "@/lib/admin-bootstrap.functions";
 import type { PHC, HealthArticle, DayKey } from "@/lib/types";
 import {
-  SERVICE_CATEGORIES, HEALTH_CATEGORIES,
+  HEALTH_CATEGORIES,
   isOpenLagos, formatTime, DAY_KEYS, DAY_LABELS, dayServices,
 } from "@/lib/types";
+import { ServiceMultiSelect } from "@/components/service-multi-select";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -382,19 +383,12 @@ function PhcForm({ phc, onClose, onSaved }: {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  function toggleService(s: string, on: boolean) {
-    setForm((f) => ({
-      ...f,
-      services: on ? Array.from(new Set([...f.services, s])) : f.services.filter((x) => x !== s),
-    }));
+  function setServices(next: string[]) {
+    setForm((f) => ({ ...f, services: next }));
   }
 
-  function toggleDayService(day: DayKey, s: string, on: boolean) {
-    setForm((f) => {
-      const cur = f.daySvc[day] ?? [];
-      const next = on ? Array.from(new Set([...cur, s])) : cur.filter((x) => x !== s);
-      return { ...f, daySvc: { ...f.daySvc, [day]: next } };
-    });
+  function setDayServices(day: DayKey, next: string[]) {
+    setForm((f) => ({ ...f, daySvc: { ...f.daySvc, [day]: next } }));
   }
 
   async function handleImage(file: File) {
@@ -487,34 +481,39 @@ function PhcForm({ phc, onClose, onSaved }: {
 
           <div className="space-y-2">
             <Label>General services offered</Label>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {SERVICE_CATEGORIES.map((s) => (
-                <label key={s} className="flex items-center gap-2 text-sm">
-                  <Checkbox checked={form.services.includes(s)} onCheckedChange={(v) => toggleService(s, !!v)} />
-                  {s}
-                </label>
-              ))}
-            </div>
+            <p className="text-xs text-muted-foreground">
+              Select from the catalogue or type a new service name and choose "Create" to save it for re-use.
+            </p>
+            <ServiceMultiSelect
+              value={form.services}
+              onChange={setServices}
+              placeholder="Add general services…"
+              ariaLabel="General services"
+            />
           </div>
 
           <div className="space-y-2 rounded-lg border border-border p-3">
             <Label className="text-sm font-semibold">Weekly clinic schedule</Label>
-            <p className="text-xs text-muted-foreground">Tick the clinics offered on each day. Days with no ticks display as "No scheduled clinic".</p>
+            <p className="text-xs text-muted-foreground">
+              For each day, pick or create the clinics scheduled. Days left empty display as "No scheduled clinic".
+            </p>
             <div className="space-y-3">
               {DAY_KEYS.map((d) => (
-                <div key={d} className="rounded border border-border/60 p-2">
-                  <div className="mb-1 text-sm font-medium">{DAY_LABELS[d]}</div>
-                  <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3">
-                    {SERVICE_CATEGORIES.map((s) => (
-                      <label key={s} className="flex items-center gap-2 text-xs">
-                        <Checkbox
-                          checked={form.daySvc[d].includes(s)}
-                          onCheckedChange={(v) => toggleDayService(d, s, !!v)}
-                        />
-                        {s}
-                      </label>
-                    ))}
+                <div key={d} className="rounded border border-border/60 p-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <div className="text-sm font-medium">{DAY_LABELS[d]}</div>
+                    <span className="text-xs text-muted-foreground">
+                      {form.daySvc[d].length === 0
+                        ? "No scheduled clinic"
+                        : `${form.daySvc[d].length} clinic${form.daySvc[d].length === 1 ? "" : "s"}`}
+                    </span>
                   </div>
+                  <ServiceMultiSelect
+                    value={form.daySvc[d]}
+                    onChange={(next) => setDayServices(d, next)}
+                    placeholder={`Add clinics for ${DAY_LABELS[d]}…`}
+                    ariaLabel={`${DAY_LABELS[d]} clinics`}
+                  />
                 </div>
               ))}
             </div>
