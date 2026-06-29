@@ -10,9 +10,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { claimFirstAdmin } from "@/lib/admin-bootstrap.functions";
 import type { PHC, HealthArticle, DayKey } from "@/lib/types";
 import {
-  SERVICE_CATEGORIES, HEALTH_CATEGORIES,
+  HEALTH_CATEGORIES,
   isOpenLagos, formatTime, DAY_KEYS, DAY_LABELS, dayServices,
 } from "@/lib/types";
+import { ServiceMultiSelect } from "@/components/service-multi-select";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -382,19 +383,12 @@ function PhcForm({ phc, onClose, onSaved }: {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
 
-  function toggleService(s: string, on: boolean) {
-    setForm((f) => ({
-      ...f,
-      services: on ? Array.from(new Set([...f.services, s])) : f.services.filter((x) => x !== s),
-    }));
+  function setServices(next: string[]) {
+    setForm((f) => ({ ...f, services: next }));
   }
 
-  function toggleDayService(day: DayKey, s: string, on: boolean) {
-    setForm((f) => {
-      const cur = f.daySvc[day] ?? [];
-      const next = on ? Array.from(new Set([...cur, s])) : cur.filter((x) => x !== s);
-      return { ...f, daySvc: { ...f.daySvc, [day]: next } };
-    });
+  function setDayServices(day: DayKey, next: string[]) {
+    setForm((f) => ({ ...f, daySvc: { ...f.daySvc, [day]: next } }));
   }
 
   async function handleImage(file: File) {
