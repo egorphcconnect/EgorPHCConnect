@@ -9,20 +9,40 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as MedicalDisclaimerRouteImport } from './routes/medical-disclaimer'
 import { Route as HealthRouteImport } from './routes/health'
 import { Route as FeedbackRouteImport } from './routes/feedback'
 import { Route as DirectoryRouteImport } from './routes/directory'
+import { Route as ContactRouteImport } from './routes/contact'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AccessibilityRouteImport } from './routes/accessibility'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PhcIdRouteImport } from './routes/phc.$id'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MedicalDisclaimerRoute = MedicalDisclaimerRouteImport.update({
+  id: '/medical-disclaimer',
+  path: '/medical-disclaimer',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HealthRoute = HealthRouteImport.update({
@@ -40,9 +60,19 @@ const DirectoryRoute = DirectoryRouteImport.update({
   path: '/directory',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContactRoute = ContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccessibilityRoute = AccessibilityRouteImport.update({
+  id: '/accessibility',
+  path: '/accessibility',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -73,22 +103,32 @@ const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/accessibility': typeof AccessibilityRoute
   '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
   '/directory': typeof DirectoryRoute
   '/feedback': typeof FeedbackRoute
   '/health': typeof HealthRoute
+  '/medical-disclaimer': typeof MedicalDisclaimerRoute
+  '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/phc/$id': typeof PhcIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/accessibility': typeof AccessibilityRoute
   '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
   '/directory': typeof DirectoryRoute
   '/feedback': typeof FeedbackRoute
   '/health': typeof HealthRoute
+  '/medical-disclaimer': typeof MedicalDisclaimerRoute
+  '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
   '/phc/$id': typeof PhcIdRoute
 }
@@ -97,11 +137,16 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about': typeof AboutRoute
+  '/accessibility': typeof AccessibilityRoute
   '/auth': typeof AuthRoute
+  '/contact': typeof ContactRoute
   '/directory': typeof DirectoryRoute
   '/feedback': typeof FeedbackRoute
   '/health': typeof HealthRoute
+  '/medical-disclaimer': typeof MedicalDisclaimerRoute
+  '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
   '/phc/$id': typeof PhcIdRoute
 }
@@ -110,22 +155,32 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/accessibility'
     | '/auth'
+    | '/contact'
     | '/directory'
     | '/feedback'
     | '/health'
+    | '/medical-disclaimer'
+    | '/privacy'
     | '/sitemap.xml'
+    | '/terms'
     | '/admin'
     | '/phc/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/about'
+    | '/accessibility'
     | '/auth'
+    | '/contact'
     | '/directory'
     | '/feedback'
     | '/health'
+    | '/medical-disclaimer'
+    | '/privacy'
     | '/sitemap.xml'
+    | '/terms'
     | '/admin'
     | '/phc/$id'
   id:
@@ -133,11 +188,16 @@ export interface FileRouteTypes {
     | '/'
     | '/_authenticated'
     | '/about'
+    | '/accessibility'
     | '/auth'
+    | '/contact'
     | '/directory'
     | '/feedback'
     | '/health'
+    | '/medical-disclaimer'
+    | '/privacy'
     | '/sitemap.xml'
+    | '/terms'
     | '/_authenticated/admin'
     | '/phc/$id'
   fileRoutesById: FileRoutesById
@@ -146,21 +206,47 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
+  AccessibilityRoute: typeof AccessibilityRoute
   AuthRoute: typeof AuthRoute
+  ContactRoute: typeof ContactRoute
   DirectoryRoute: typeof DirectoryRoute
   FeedbackRoute: typeof FeedbackRoute
   HealthRoute: typeof HealthRoute
+  MedicalDisclaimerRoute: typeof MedicalDisclaimerRoute
+  PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  TermsRoute: typeof TermsRoute
   PhcIdRoute: typeof PhcIdRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/medical-disclaimer': {
+      id: '/medical-disclaimer'
+      path: '/medical-disclaimer'
+      fullPath: '/medical-disclaimer'
+      preLoaderRoute: typeof MedicalDisclaimerRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/health': {
@@ -184,11 +270,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DirectoryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contact': {
+      id: '/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof ContactRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth': {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/accessibility': {
+      id: '/accessibility'
+      path: '/accessibility'
+      fullPath: '/accessibility'
+      preLoaderRoute: typeof AccessibilityRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -244,11 +344,16 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutRoute: AboutRoute,
+  AccessibilityRoute: AccessibilityRoute,
   AuthRoute: AuthRoute,
+  ContactRoute: ContactRoute,
   DirectoryRoute: DirectoryRoute,
   FeedbackRoute: FeedbackRoute,
   HealthRoute: HealthRoute,
+  MedicalDisclaimerRoute: MedicalDisclaimerRoute,
+  PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  TermsRoute: TermsRoute,
   PhcIdRoute: PhcIdRoute,
 }
 export const routeTree = rootRouteImport

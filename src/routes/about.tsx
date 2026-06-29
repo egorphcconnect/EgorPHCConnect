@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
-  HeartPulse, MapPin, MessageSquare, BookOpen, Calendar, Navigation,
-  Search, Shield, Users, Sparkles, Mail,
+  HeartPulse, MapPin, MessageSquare, Calendar, Navigation,
+  Search, Shield, Users, Sparkles, Mail, Phone,
 } from "lucide-react";
 
 export const Route = createFileRoute("/about")({
@@ -186,7 +186,3 @@ function Feature({
   );
 }
 
-function Phone(props: React.SVGProps<SVGSVGElement>) {
-  // Avoid extra import; alias to lucide's Phone via inline
-  return <HeartPulse {...props} />;
-}
