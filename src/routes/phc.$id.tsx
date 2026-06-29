@@ -1,10 +1,19 @@
 import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
-import { MapPin, Phone, Clock, Navigation, MessageSquarePlus, ArrowLeft, CheckCircle2, Calendar } from "lucide-react";
+import {
+  MapPin, Phone, Clock, Navigation, MessageSquarePlus, ArrowLeft,
+  CheckCircle2, Calendar, AlertTriangle,
+} from "lucide-react";
 import { getPhc } from "@/lib/phcs.functions";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { isOpenLagos, formatTime, dayServices, DAY_KEYS, DAY_LABELS, nowLagos, type PHC } from "@/lib/types";
+import {
+  Accordion, AccordionContent, AccordionItem, AccordionTrigger,
+} from "@/components/ui/accordion";
+import { TodayClinics } from "@/components/today-clinics";
+import {
+  isOpenLagos, formatTime, dayServices, DAY_KEYS, DAY_LABELS, nowLagos, type PHC,
+} from "@/lib/types";
 
 export const Route = createFileRoute("/phc/$id")({
   loader: async ({ context, params }) => {
@@ -23,7 +32,7 @@ export const Route = createFileRoute("/phc/$id")({
         {
           name: "description",
           content: phc
-            ? `${phc.name} in ${phc.ward} ward. Weekly clinic schedule, hours and directions for this Primary Healthcare Centre in Egor LGA.`
+            ? `${phc.name} in ${phc.ward} ward. Today's clinics, weekly schedule, hours and directions.`
             : "Primary Healthcare Centre details.",
         },
         { property: "og:title", content: phc?.name ?? "PHC details" },
@@ -87,11 +96,14 @@ function PhcDetails() {
       )}
 
       <div className="mt-4 flex flex-wrap items-start justify-between gap-3">
-        <div>
+        <div className="min-w-0">
           <h1 className="text-2xl font-bold text-foreground md:text-3xl">{phc.name}</h1>
-          <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-            <MapPin className="h-4 w-4" /> {phc.address} · {phc.ward} Ward
-            {phc.facility_type ? ` · ${phc.facility_type}` : ""}
+          <p className="mt-1 flex items-start gap-1 text-sm text-muted-foreground">
+            <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+            <span>
+              {phc.address} · {phc.ward} Ward
+              {phc.facility_type ? ` · ${phc.facility_type}` : ""}
+            </span>
           </p>
         </div>
         <Badge
@@ -129,9 +141,14 @@ function PhcDetails() {
         </Button>
       </div>
 
+      {/* TODAY'S CLINICS — top-of-page highlight */}
+      <div className="mt-6">
+        <TodayClinics phc={phc} />
+      </div>
+
       <div className="mt-8 grid gap-6 md:grid-cols-3">
         <div className="space-y-6 md:col-span-2">
-          {/* Weekly schedule */}
+          {/* Weekly schedule accordion */}
           <section className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
             <h2 className="flex items-center gap-2 text-base font-semibold text-card-foreground">
               <Calendar className="h-4 w-4" /> Weekly clinic schedule
@@ -139,31 +156,41 @@ function PhcDetails() {
             <p className="mt-1 text-xs text-muted-foreground">
               Daily hours: <span className="font-medium text-foreground">{hoursLabel}</span> (Africa/Lagos time)
             </p>
-            <ul className="mt-4 divide-y divide-border">
+
+            <Accordion type="multiple" defaultValue={[todayKey]} className="mt-4">
               {DAY_KEYS.map((d) => {
                 const list = dayServices(phc, d);
                 const isToday = d === todayKey;
                 return (
-                  <li key={d} className={`flex flex-col gap-1 py-3 sm:flex-row sm:items-start sm:gap-4 ${isToday ? "bg-primary-soft/40 -mx-2 px-2 rounded" : ""}`}>
-                    <div className="w-32 shrink-0 text-sm font-medium text-foreground">
-                      {DAY_LABELS[d]}
-                      {isToday && <span className="ml-2 text-xs text-primary">(today)</span>}
-                    </div>
-                    {list.length === 0 ? (
-                      <p className="text-sm text-muted-foreground">No scheduled clinic</p>
-                    ) : (
-                      <ul className="flex flex-wrap gap-1.5">
-                        {list.map((s) => (
-                          <li key={s} className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary">
-                            <CheckCircle2 className="h-3 w-3" /> {s}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
+                  <AccordionItem key={d} value={d} className={isToday ? "rounded-md bg-primary-soft/30 px-2" : ""}>
+                    <AccordionTrigger className="hover:no-underline">
+                      <div className="flex flex-1 items-center justify-between gap-3 pr-2">
+                        <span className="font-medium text-foreground">
+                          {DAY_LABELS[d]}
+                          {isToday && <span className="ml-2 text-xs font-normal text-primary">(today)</span>}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {list.length === 0 ? "No clinic" : `${list.length} clinic${list.length === 1 ? "" : "s"}`}
+                        </span>
+                      </div>
+                    </AccordionTrigger>
+                    <AccordionContent>
+                      {list.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">No scheduled clinic</p>
+                      ) : (
+                        <ul className="flex flex-wrap gap-1.5">
+                          {list.map((s) => (
+                            <li key={s} className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
+                              <CheckCircle2 className="h-3 w-3" /> {s}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                    </AccordionContent>
+                  </AccordionItem>
                 );
               })}
-            </ul>
+            </Accordion>
           </section>
 
           {/* General services */}
@@ -227,6 +254,20 @@ function PhcDetails() {
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0" /> {phc.address}
               </p>
             </div>
+          </section>
+
+          <section className="rounded-xl border border-warning/30 bg-warning/5 p-4 text-xs text-foreground">
+            <p className="flex items-start gap-2">
+              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
+              <span>
+                Information on this page is provided for convenience and may change. For medical
+                advice or emergencies, please call <a href="tel:112" className="font-medium text-primary">112</a> or
+                visit the nearest health facility immediately. See our{" "}
+                <Link to="/medical-disclaimer" className="font-medium text-primary hover:underline">
+                  medical disclaimer
+                </Link>.
+              </span>
+            </p>
           </section>
         </aside>
       </div>
