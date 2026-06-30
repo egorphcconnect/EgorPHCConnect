@@ -162,9 +162,6 @@ function About() {
             <Link to="/terms" className="inline-flex h-11 items-center rounded-md border border-input bg-background px-5 text-sm font-medium hover:bg-accent">
               Terms
             </Link>
-            <Link to="/medical-disclaimer" className="inline-flex h-11 items-center rounded-md border border-input bg-background px-5 text-sm font-medium hover:bg-accent">
-              Medical Disclaimer
-            </Link>
           </div>
         </section>
       </div>
