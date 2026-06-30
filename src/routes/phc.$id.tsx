@@ -2,7 +2,7 @@ import { createFileRoute, Link, notFound } from "@tanstack/react-router";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import {
   MapPin, Phone, Clock, Navigation, MessageSquarePlus, ArrowLeft,
-  CheckCircle2, Calendar, AlertTriangle,
+  CheckCircle2, Calendar,
 } from "lucide-react";
 import { getPhc } from "@/lib/phcs.functions";
 import { Button } from "@/components/ui/button";
