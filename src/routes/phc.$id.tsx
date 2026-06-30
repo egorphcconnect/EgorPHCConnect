@@ -243,31 +243,15 @@ function PhcDetails() {
           <section className="rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
             <h2 className="text-base font-semibold text-card-foreground">Contact</h2>
             <div className="mt-3 space-y-2 text-sm">
-              {phc.contact_phone ? (
+              {phc.contact_phone && (
                 <a href={`tel:${phc.contact_phone}`} className="flex items-center gap-2 text-primary hover:underline">
                   <Phone className="h-4 w-4" /> {phc.contact_phone}
                 </a>
-              ) : (
-                <p className="text-muted-foreground">No phone number on record.</p>
               )}
               <p className="flex items-start gap-2 text-muted-foreground">
                 <MapPin className="mt-0.5 h-4 w-4 shrink-0" /> {phc.address}
               </p>
             </div>
-          </section>
-
-          <section className="rounded-xl border border-warning/30 bg-warning/5 p-4 text-xs text-foreground">
-            <p className="flex items-start gap-2">
-              <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-warning" />
-              <span>
-                Information on this page is provided for convenience and may change. For medical
-                advice or emergencies, please call <a href="tel:112" className="font-medium text-primary">112</a> or
-                visit the nearest health facility immediately. See our{" "}
-                <Link to="/medical-disclaimer" className="font-medium text-primary hover:underline">
-                  medical disclaimer
-                </Link>.
-              </span>
-            </p>
           </section>
         </aside>
       </div>

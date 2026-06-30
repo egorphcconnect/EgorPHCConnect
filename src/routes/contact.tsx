@@ -31,8 +31,8 @@ function Contact() {
         <Card
           icon={Mail}
           title="General enquiries"
-          body="For partnership ideas, corrections to PHC information or accessibility reports, email the platform team."
-          action={<a href="mailto:hello@egorphcconnect.ng" className="text-sm font-medium text-primary hover:underline">hello@egorphcconnect.ng</a>}
+          body="For partnership ideas, corrections to PHC information or accessibility reports, please reach us through the feedback form."
+          action={<Link to="/feedback" className="text-sm font-medium text-primary hover:underline">Open feedback form →</Link>}
         />
         <Card
           icon={Phone}

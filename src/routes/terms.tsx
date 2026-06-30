@@ -77,7 +77,6 @@ function Terms() {
         not a substitute for professional medical advice, diagnosis or treatment. Always
         consult a qualified healthcare professional regarding any medical condition. In an
         emergency, contact emergency services or visit the nearest health facility immediately.
-        See our <Link to="/medical-disclaimer" className="text-primary hover:underline">Medical Disclaimer</Link>.
       </Section>
 
       <Section title="10. Availability of services">
