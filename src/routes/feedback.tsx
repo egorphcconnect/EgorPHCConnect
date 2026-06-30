@@ -9,6 +9,7 @@ import { listPhcs, submitFeedback } from "@/lib/phcs.functions";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import {
   Select,
@@ -141,14 +142,20 @@ function FeedbackPage() {
 
         <div className="space-y-2">
           <Label htmlFor="svc">Service used</Label>
-          <Select value={serviceUsed} onValueChange={setServiceUsed}>
-            <SelectTrigger id="svc" className="h-11"><SelectValue placeholder="Optional" /></SelectTrigger>
-            <SelectContent>
-              {SERVICE_CATEGORIES.map((s) => (
-                <SelectItem key={s} value={s}>{s}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Input
+            id="svc"
+            list="svc-options"
+            value={serviceUsed}
+            onChange={(e) => setServiceUsed(e.target.value)}
+            placeholder="Choose from the list or type your own"
+            className="h-11"
+            maxLength={120}
+          />
+          <datalist id="svc-options">
+            {SERVICE_CATEGORIES.map((s) => (
+              <option key={s} value={s} />
+            ))}
+          </datalist>
         </div>
 
         <StarRow label="Overall rating *" value={rating} onChange={setRating} />
