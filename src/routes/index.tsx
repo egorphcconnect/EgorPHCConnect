@@ -87,61 +87,71 @@ function Index() {
   return (
     <div>
       {/* HERO */}
-      <section className="hero-gradient text-primary-foreground">
-        <div className="mx-auto max-w-6xl px-4 py-12 md:py-20">
-          <div className="max-w-2xl">
-            <span className="inline-flex items-center rounded-full bg-white/15 px-3 py-1 text-xs font-medium backdrop-blur">
+      <section
+        aria-label="Welcome to Egor PHC Connect"
+        className="relative isolate flex min-h-[60vh] items-center overflow-hidden md:min-h-[65vh] lg:min-h-[70vh]"
+      >
+        <img
+          src={phcHero.url}
+          alt="Entrance to a Primary Healthcare Centre in Egor Local Government Area."
+          fetchPriority="high"
+          decoding="async"
+          className="absolute inset-0 -z-20 h-full w-full object-cover object-center"
+        />
+        {/* Dark green overlay for legibility */}
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 -z-10 bg-gradient-to-br from-[oklch(0.30_0.10_158/0.78)] via-[oklch(0.30_0.10_158/0.60)] to-[oklch(0.20_0.08_158/0.55)]"
+        />
+
+        <div className="mx-auto w-full max-w-6xl px-4 py-16 md:py-24">
+          <div className="max-w-2xl text-primary-foreground">
+            <span className="inline-flex animate-in fade-in slide-in-from-bottom-3 items-center rounded-full border border-secondary/40 bg-secondary/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur duration-500">
               Egor LGA · Edo State · Nigeria
             </span>
-            <h1 className="mt-4 text-3xl font-bold leading-tight md:text-5xl">
-              Find healthcare near you in Egor LGA
+            <h1 className="mt-4 animate-in fade-in slide-in-from-bottom-4 text-3xl font-bold leading-tight text-white drop-shadow-md duration-700 sm:text-4xl md:text-5xl lg:text-6xl">
+              Find the Right Primary Healthcare Centre in Egor
             </h1>
-            <p className="mt-3 text-base text-white/90 md:text-lg">
-              Locate Primary Healthcare Centres, see today's clinics, get directions and read trusted health information.
+            <p className="mt-4 max-w-xl animate-in fade-in slide-in-from-bottom-4 text-base leading-relaxed text-white/95 drop-shadow duration-700 [animation-delay:150ms] sm:text-lg">
+              Find nearby Primary Healthcare Centres, explore available services, view clinic schedules, and get directions—all in one place.
             </p>
 
-            <form
-              className="mt-6 flex flex-col gap-2 rounded-xl bg-white p-2 shadow-lg sm:flex-row"
-              onSubmit={(e) => {
-                e.preventDefault();
-                navigate({ to: "/directory", search: { q } as never });
-              }}
-            >
-              <div className="flex flex-1 items-center gap-2 px-2">
-                <Search className="h-5 w-5 text-muted-foreground" />
-                <Input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder="Search PHC, ward or service…"
-                  className="border-0 text-foreground shadow-none focus-visible:ring-0"
-                  aria-label="Search PHCs"
-                />
-              </div>
-              <Button type="submit" size="lg" className="h-12">Search</Button>
-            </form>
-
-            <div className="mt-3 flex flex-wrap gap-2 text-xs">
-              <Link
-                to="/directory"
-                search={{ nearest: 1 } as never}
-                className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 font-medium text-white backdrop-blur hover:bg-white/25"
+            <div className="mt-7 flex animate-in fade-in slide-in-from-bottom-4 flex-wrap gap-3 duration-700 [animation-delay:300ms]">
+              <Button
+                asChild
+                size="lg"
+                className="h-12 bg-secondary px-6 text-secondary-foreground shadow-lg hover:bg-secondary/90"
               >
-                <LocateFixed className="h-3.5 w-3.5" /> Find nearest PHC
-              </Link>
-              <Link
-                to="/directory"
-                search={{ openNow: 1 } as never}
-                className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1.5 font-medium text-white backdrop-blur hover:bg-white/25"
+                <Link to="/directory">
+                  <Search className="h-4 w-4" /> Find a PHC
+                </Link>
+              </Button>
+              <Button
+                asChild
+                size="lg"
+                variant="outline"
+                className="h-12 border-white/70 bg-white/10 px-6 text-white backdrop-blur hover:bg-white/20 hover:text-white"
               >
-                Open right now
-              </Link>
+                <Link to="/directory" search={{ nearest: 1 } as never}>
+                  <LocateFixed className="h-4 w-4" /> Find the Nearest PHC
+                </Link>
+              </Button>
             </div>
           </div>
         </div>
+
+        {/* Scroll cue */}
+        <a
+          href="#quick-services"
+          aria-label="Scroll to explore services"
+          className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full border border-white/40 bg-white/10 p-2 text-white backdrop-blur transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+        >
+          <ChevronDown className="h-5 w-5 animate-bounce" />
+        </a>
       </section>
 
       {/* QUICK SERVICES */}
-      <section className="mx-auto max-w-6xl px-4 py-10">
+      <section id="quick-services" className="mx-auto max-w-6xl px-4 py-10">
         <h2 className="text-xl font-semibold text-foreground">Quick services</h2>
         <p className="mt-1 text-sm text-muted-foreground">Tap a service to find PHCs that offer it.</p>
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
