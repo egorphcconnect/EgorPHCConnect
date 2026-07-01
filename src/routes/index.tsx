@@ -13,10 +13,6 @@ import { Badge } from "@/components/ui/badge";
 import { SERVICE_CATEGORIES, nowLagos, dayServices, DAY_LABELS, haversineKm, isOpenLagos } from "@/lib/types";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import phcHero from "@/assets/phc-hero.png.asset.json";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { SERVICE_CATEGORIES, nowLagos, dayServices, DAY_LABELS, haversineKm, isOpenLagos } from "@/lib/types";
-import { useGeolocation } from "@/hooks/use-geolocation";
 
 export const Route = createFileRoute("/")({
   head: () => ({
