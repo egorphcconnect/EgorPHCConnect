@@ -3,11 +3,16 @@ import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import {
   Search, MapPin, Megaphone, ArrowRight, Syringe, Baby, Pill, HeartPulse,
-  ShieldPlus, Users, CalendarClock, Navigation, LocateFixed,
+  ShieldPlus, Users, CalendarClock, Navigation, LocateFixed, ChevronDown,
 } from "lucide-react";
 import { listPhcs, listArticles } from "@/lib/phcs.functions";
 import { PhcCard } from "@/components/phc-card";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { SERVICE_CATEGORIES, nowLagos, dayServices, DAY_LABELS, haversineKm, isOpenLagos } from "@/lib/types";
+import { useGeolocation } from "@/hooks/use-geolocation";
+import phcHero from "@/assets/phc-hero.png.asset.json";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { SERVICE_CATEGORIES, nowLagos, dayServices, DAY_LABELS, haversineKm, isOpenLagos } from "@/lib/types";
