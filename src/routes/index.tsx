@@ -23,10 +23,10 @@ export const Route = createFileRoute("/")({
         content:
           "Find Primary Healthcare Centres, today's clinics, and trusted health information for residents of Egor LGA, Edo State, Nigeria.",
       },
-      { property: "og:title", content: "Egor PHC Connect" },
+      { property: "og:title", content: "Egor PHC Connect — Primary Healthcare in Egor LGA, Edo State" },
       {
         property: "og:description",
-        content: "Find Primary Healthcare Centres and today's clinics in Egor LGA.",
+        content: "Find Primary Healthcare Centres, today's clinics, and trusted health information for residents of Egor LGA, Edo State, Nigeria.",
       },
     ],
   }),
