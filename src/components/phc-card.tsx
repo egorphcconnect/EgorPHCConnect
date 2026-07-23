@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Clock, Phone, ArrowRight, Navigation } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { PhcImage } from "@/components/phc-image";
 import type { PHC } from "@/lib/types";
 import { isOpenLagos, nowLagos, dayServices, formatTime, DAY_LABELS } from "@/lib/types";
+
 
 export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | null }) {
   const open = isOpenLagos(phc.opening_time, phc.closing_time);
@@ -18,9 +20,11 @@ export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | n
   const directionsLink = `https://www.google.com/maps/dir/?api=1&destination=${mapQuery}`;
 
   return (
-    <article className="group flex flex-col rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)] transition-all hover:border-primary/40 hover:shadow-md">
+    <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-card)] transition-all hover:border-primary/40 hover:shadow-md">
       <Link to="/phc/$id" params={{ id: phc.id }} className="flex flex-col">
-        <div className="flex items-start justify-between gap-3">
+        <PhcImage phc={phc} aspect="aspect-[16/9]" className="rounded-none" />
+        <div className="flex items-start justify-between gap-3 p-5 pb-0">
+
           <div className="min-w-0">
             <h3 className="truncate text-base font-semibold text-card-foreground">{phc.name}</h3>
             <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
