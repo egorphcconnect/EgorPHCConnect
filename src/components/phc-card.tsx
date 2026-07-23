@@ -43,7 +43,7 @@ export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | n
           </Badge>
         </div>
 
-        <div className="mt-3">
+        <div className="px-5 pt-3">
           <p className="text-xs font-medium text-primary">Today ({DAY_LABELS[dayKey]})</p>
           <div className="mt-1 flex flex-wrap gap-1.5">
             {today.length === 0 ? (
@@ -51,10 +51,7 @@ export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | n
             ) : (
               <>
                 {today.slice(0, 4).map((s) => (
-                  <span
-                    key={s}
-                    className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary"
-                  >
+                  <span key={s} className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary">
                     {s}
                   </span>
                 ))}
@@ -68,7 +65,7 @@ export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | n
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 px-5 text-xs text-muted-foreground">
           {hoursLabel && (
             <span className="flex items-center gap-1">
               <Clock className="h-3.5 w-3.5" /> {hoursLabel}
@@ -85,7 +82,8 @@ export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | n
         </div>
       </Link>
 
-      <div className="mt-4 flex items-center justify-between gap-2">
+      <div className="mt-4 flex items-center justify-between gap-2 px-5 pb-5">
+
         <Link
           to="/phc/$id"
           params={{ id: phc.id }}
