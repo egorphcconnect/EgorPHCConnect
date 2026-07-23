@@ -1,8 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   HeartPulse, MapPin, MessageSquare, Calendar, Navigation,
-  Search, Shield, Users, Sparkles, Mail, Phone,
+  Search, Shield, Users, Sparkles, Mail, Phone, Award,
 } from "lucide-react";
+import nhfLogo from "@/assets/nhf-logo.jpg.asset.json";
+import leadPhoto from "@/assets/eseosa-irorere.jpg.asset.json";
+
 
 export const Route = createFileRoute("/about")({
   head: () => ({
@@ -120,6 +123,76 @@ function About() {
           </div>
         </section>
 
+        {/* Programme Support */}
+        <section className="rounded-2xl border border-primary/20 bg-card p-6 shadow-[var(--shadow-card)]">
+          <div className="flex flex-wrap items-start gap-6">
+            <a
+              href="https://nationalhealthfellows.ng"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="shrink-0 rounded-lg border border-border bg-white p-3 shadow-sm"
+              aria-label="Visit the National Health Fellows Programme website"
+            >
+              <img
+                src={nhfLogo.url}
+                alt="National Health Fellows Programme logo"
+                width={260}
+                height={85}
+                className="h-16 w-auto object-contain"
+              />
+            </a>
+            <div className="min-w-0 flex-1">
+              <span className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
+                <Award className="h-3 w-3" /> Programme Support
+              </span>
+              <h2 className="mt-2 text-2xl font-bold text-foreground">
+                A National Health Fellows Programme project
+              </h2>
+              <p className="mt-3 text-muted-foreground">
+                EgorPHCConnect was developed as a project under the{" "}
+                <span className="font-semibold text-foreground">National Health Fellows Programme</span>,
+                with the goal of improving access to reliable information about Primary
+                Healthcare Centres and available services in Egor Local Government Area,
+                Edo State.
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                The platform reflects the Programme's commitment to strengthening primary
+                healthcare delivery through practical, community-focused digital solutions.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        {/* Project Lead */}
+        <section>
+          <h2 className="text-2xl font-bold text-foreground">Meet the Project Lead</h2>
+          <div className="mt-5 grid gap-6 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] md:grid-cols-[220px_1fr]">
+            <div className="mx-auto md:mx-0">
+              <img
+                src={leadPhoto.url}
+                alt="Portrait photograph of Eseosa Emmanuella Irorere, Project Lead of EgorPHCConnect"
+                width={220}
+                height={260}
+                className="h-56 w-52 rounded-xl border border-border object-cover shadow-sm"
+              />
+            </div>
+            <div className="min-w-0">
+              <h3 className="text-xl font-semibold text-foreground">Eseosa Emmanuella Irorere</h3>
+              <p className="mt-1 text-sm font-medium text-primary">Project Lead, EgorPHCConnect</p>
+              <p className="mt-4 text-muted-foreground">
+                Eseosa conceived and led the development of EgorPHCConnect as a digital
+                solution to improve access to information about Primary Healthcare Centres
+                and the services they provide in Egor Local Government Area. Her focus is on
+                making primary healthcare more visible, more accessible and easier to navigate
+                for the residents her community serves.
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground">
+                The project was developed under the National Health Fellows Programme.
+              </p>
+            </div>
+          </div>
+        </section>
+
         {/* How info is managed */}
         <section>
           <h2 className="text-2xl font-bold text-foreground">How information is managed</h2>
@@ -132,6 +205,7 @@ function About() {
             facility directly.
           </p>
         </section>
+
 
         {/* Vision */}
         <section className="rounded-2xl border border-secondary/40 bg-secondary-soft p-6">
