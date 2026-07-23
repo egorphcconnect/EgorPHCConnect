@@ -11,6 +11,8 @@ import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "@/components/ui/accordion";
 import { TodayClinics } from "@/components/today-clinics";
+import { PhcImage } from "@/components/phc-image";
+
 import {
   isOpenLagos, formatTime, dayServices, DAY_KEYS, DAY_LABELS, nowLagos, type PHC,
 } from "@/lib/types";
@@ -86,14 +88,10 @@ function PhcDetails() {
         <ArrowLeft className="mr-1 h-4 w-4" /> Back to directory
       </Link>
 
-      {phc.image_url && (
-        <img
-          src={phc.image_url}
-          alt={phc.name}
-          className="mt-4 h-56 w-full rounded-xl object-cover"
-          loading="lazy"
-        />
-      )}
+      <div className="mt-4">
+        <PhcImage phc={phc} aspect="aspect-[21/9]" />
+      </div>
+
 
       <div className="mt-4 flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0">

@@ -1,8 +1,10 @@
 import { Link } from "@tanstack/react-router";
 import { MapPin, Clock, Phone, ArrowRight, Navigation } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { PhcImage } from "@/components/phc-image";
 import type { PHC } from "@/lib/types";
 import { isOpenLagos, nowLagos, dayServices, formatTime, DAY_LABELS } from "@/lib/types";
+
 
 export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | null }) {
   const open = isOpenLagos(phc.opening_time, phc.closing_time);
@@ -18,9 +20,11 @@ export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | n
   const directionsLink = `https://www.google.com/maps/dir/?api=1&destination=${mapQuery}`;
 
   return (
-    <article className="group flex flex-col rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)] transition-all hover:border-primary/40 hover:shadow-md">
+    <article className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-[var(--shadow-card)] transition-all hover:border-primary/40 hover:shadow-md">
       <Link to="/phc/$id" params={{ id: phc.id }} className="flex flex-col">
-        <div className="flex items-start justify-between gap-3">
+        <PhcImage phc={phc} aspect="aspect-[16/9]" className="rounded-none" />
+        <div className="flex items-start justify-between gap-3 p-5 pb-0">
+
           <div className="min-w-0">
             <h3 className="truncate text-base font-semibold text-card-foreground">{phc.name}</h3>
             <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
@@ -39,7 +43,7 @@ export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | n
           </Badge>
         </div>
 
-        <div className="mt-3">
+        <div className="px-5 pt-3">
           <p className="text-xs font-medium text-primary">Today ({DAY_LABELS[dayKey]})</p>
           <div className="mt-1 flex flex-wrap gap-1.5">
             {today.length === 0 ? (
@@ -47,10 +51,7 @@ export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | n
             ) : (
               <>
                 {today.slice(0, 4).map((s) => (
-                  <span
-                    key={s}
-                    className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary"
-                  >
+                  <span key={s} className="rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary">
                     {s}
                   </span>
                 ))}
@@ -64,7 +65,7 @@ export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | n
           </div>
         </div>
 
-        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        <div className="mt-4 flex flex-wrap items-center gap-x-4 gap-y-1 px-5 text-xs text-muted-foreground">
           {hoursLabel && (
             <span className="flex items-center gap-1">
               <Clock className="h-3.5 w-3.5" /> {hoursLabel}
@@ -81,7 +82,8 @@ export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | n
         </div>
       </Link>
 
-      <div className="mt-4 flex items-center justify-between gap-2">
+      <div className="mt-4 flex items-center justify-between gap-2 px-5 pb-5">
+
         <Link
           to="/phc/$id"
           params={{ id: phc.id }}

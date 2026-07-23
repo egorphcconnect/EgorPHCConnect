@@ -14,6 +14,8 @@ import {
   isOpenLagos, formatTime, DAY_KEYS, DAY_LABELS, dayServices,
 } from "@/lib/types";
 import { ServiceMultiSelect } from "@/components/service-multi-select";
+import { PhcImage, extractPhcImagePath } from "@/components/phc-image";
+
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -298,7 +300,7 @@ function PhcManager() {
           <DialogHeader><DialogTitle>{viewing?.name}</DialogTitle></DialogHeader>
           {viewing && (
             <div className="space-y-2 text-sm">
-              {viewing.image_url && <img src={viewing.image_url} alt={viewing.name} className="h-40 w-full rounded object-cover" />}
+              {viewing.image_url && <PhcImage phc={viewing} aspect="aspect-[16/9]" />}
               <p><b>Ward:</b> {viewing.ward}</p>
               <p><b>Type:</b> {viewing.facility_type ?? "—"}</p>
               <p><b>Address:</b> {viewing.address}</p>
@@ -392,16 +394,29 @@ function PhcForm({ phc, onClose, onSaved }: {
   }
 
   async function handleImage(file: File) {
+    const ACCEPTED = ["image/jpeg", "image/png", "image/webp"];
+    if (!ACCEPTED.includes(file.type)) {
+      toast.error("Only JPG, PNG or WebP images are allowed"); return;
+    }
     if (file.size > 5 * 1024 * 1024) { toast.error("Image must be under 5 MB"); return; }
     setUploading(true);
-    const path = `${crypto.randomUUID()}-${file.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
-    const { error } = await supabase.storage.from("phc-images").upload(path, file, { upsert: false });
+    // Remove any previous storage object so we don't accumulate orphans.
+    if (form.image_url) {
+      const prev = extractPhcImagePath(form.image_url);
+      if (prev) { await supabase.storage.from("phc-images").remove([prev]); }
+    }
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `${crypto.randomUUID()}.${ext}`;
+    const { error } = await supabase.storage
+      .from("phc-images")
+      .upload(path, file, { upsert: false, contentType: file.type });
     if (error) { toast.error(error.message); setUploading(false); return; }
-    const { data } = supabase.storage.from("phc-images").getPublicUrl(path);
-    setForm((f) => ({ ...f, image_url: data.publicUrl }));
+    // Store the storage path — the app resolves it to a signed URL on render.
+    setForm((f) => ({ ...f, image_url: path }));
     setUploading(false);
     toast.success("Image uploaded");
   }
+
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
@@ -521,19 +536,39 @@ function PhcForm({ phc, onClose, onSaved }: {
 
           <div className="space-y-2">
             <Label>PHC image</Label>
-            {form.image_url && <img src={form.image_url} alt="" className="h-32 w-full rounded object-cover" />}
+            {form.image_url && (
+              <PhcImage phc={{ image_url: form.image_url, name: form.name || "PHC" }} aspect="aspect-[16/9]" />
+            )}
             <div className="flex items-center gap-2">
-              <Input type="file" accept="image/*" disabled={uploading} onChange={(e) => {
-                const f = e.target.files?.[0]; if (f) handleImage(f);
-              }} />
+              <Input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                disabled={uploading}
+                onChange={(e) => {
+                  const f = e.target.files?.[0]; if (f) handleImage(f);
+                }}
+              />
               {form.image_url && (
-                <Button type="button" size="sm" variant="ghost" onClick={() => setForm({ ...form, image_url: "" })}>
-                  Clear
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={async () => {
+                    const prev = extractPhcImagePath(form.image_url);
+                    if (prev) await supabase.storage.from("phc-images").remove([prev]);
+                    setForm({ ...form, image_url: "" });
+                  }}
+                >
+                  Remove
                 </Button>
               )}
             </div>
-            {uploading && <p className="text-xs text-muted-foreground"><ImageIcon className="mr-1 inline h-3 w-3" />Uploading…</p>}
+            <p className="text-xs text-muted-foreground">
+              Accepted formats: JPG, PNG, WebP · Max size: 5 MB.
+              {uploading && <> <ImageIcon className="ml-1 inline h-3 w-3" /> Uploading…</>}
+            </p>
           </div>
+
 
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>Cancel</Button>
