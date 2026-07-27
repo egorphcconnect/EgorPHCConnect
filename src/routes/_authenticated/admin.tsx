@@ -119,9 +119,11 @@ function AdminPage() {
         <TabsList>
           <TabsTrigger value="phcs">PHCs</TabsTrigger>
           <TabsTrigger value="articles">Health Articles</TabsTrigger>
+          <TabsTrigger value="categories">Categories</TabsTrigger>
         </TabsList>
         <TabsContent value="phcs"><PhcManager /></TabsContent>
         <TabsContent value="articles"><ArticleManager /></TabsContent>
+        <TabsContent value="categories"><CategoryManager /></TabsContent>
       </Tabs>
     </div>
   );
