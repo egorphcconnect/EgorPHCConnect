@@ -124,13 +124,13 @@ function About() {
         </section>
 
         {/* Programme Support */}
-        <section className="rounded-2xl border border-primary/20 bg-card p-6 shadow-[var(--shadow-card)]">
-          <div className="flex flex-wrap items-start gap-6">
+        <section className="rounded-2xl border border-primary/20 bg-card p-5 shadow-[var(--shadow-card)] sm:p-6">
+          <div className="flex flex-col items-start gap-5 md:flex-row md:gap-6">
             <a
               href="https://nationalhealthfellows.ng"
               target="_blank"
               rel="noopener noreferrer"
-              className="shrink-0 rounded-lg border border-border bg-white p-3 shadow-sm"
+              className="mx-auto shrink-0 rounded-lg border border-border bg-white p-3 shadow-sm md:mx-0"
               aria-label="Visit the National Health Fellows Programme website"
             >
               <img
@@ -138,17 +138,17 @@ function About() {
                 alt="National Health Fellows Programme logo"
                 width={260}
                 height={85}
-                className="h-16 w-auto object-contain"
+                className="h-14 w-auto object-contain sm:h-16"
               />
             </a>
-            <div className="min-w-0 flex-1">
+            <div className="w-full min-w-0 flex-1">
               <span className="inline-flex items-center gap-1 rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-medium text-primary">
                 <Award className="h-3 w-3" /> Programme Support
               </span>
-              <h2 className="mt-2 text-2xl font-bold text-foreground">
+              <h2 className="mt-2 text-xl font-bold text-foreground sm:text-2xl">
                 A National Health Fellows Programme project
               </h2>
-              <p className="mt-3 text-muted-foreground">
+              <p className="mt-3 text-sm text-muted-foreground sm:text-base">
                 EgorPHCConnect was developed as a project under the{" "}
                 <span className="font-semibold text-foreground">National Health Fellows Programme</span>,
                 with the goal of improving access to reliable information about Primary
@@ -166,32 +166,42 @@ function About() {
         {/* Project Lead */}
         <section>
           <h2 className="text-2xl font-bold text-foreground">Meet the Project Lead</h2>
-          <div className="mt-5 grid gap-6 rounded-2xl border border-border bg-card p-6 shadow-[var(--shadow-card)] md:grid-cols-[220px_1fr]">
+          <div className="mt-5 grid gap-6 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6 md:grid-cols-[220px_1fr]">
             <div className="mx-auto md:mx-0">
               <img
                 src={leadPhoto.url}
-                alt="Portrait photograph of Eseosa Emmanuella Irorere, Project Lead of EgorPHCConnect"
+                alt="Portrait photograph of Dr. Eseosa Emmanuella Irorere, Project Lead of EgorPHCConnect"
                 width={220}
                 height={260}
                 className="h-56 w-52 rounded-xl border border-border object-cover shadow-sm"
               />
             </div>
             <div className="min-w-0">
-              <h3 className="text-xl font-semibold text-foreground">Eseosa Emmanuella Irorere</h3>
-              <p className="mt-1 text-sm font-medium text-primary">Project Lead, EgorPHCConnect</p>
-              <p className="mt-4 text-muted-foreground">
-                Eseosa conceived and led the development of EgorPHCConnect as a digital
-                solution to improve access to information about Primary Healthcare Centres
-                and the services they provide in Egor Local Government Area. Her focus is on
-                making primary healthcare more visible, more accessible and easier to navigate
-                for the residents her community serves.
+              <h3 className="text-xl font-semibold text-foreground">
+                Dr. Eseosa Emmanuella Irorere, PharmD
+              </h3>
+              <p className="mt-1 text-sm font-medium text-primary">
+                Pharmacist · National Health Fellow, Egor LGA · Project Lead, EgorPHCConnect
+              </p>
+              <p className="mt-4 text-sm text-muted-foreground sm:text-base">
+                Dr. Eseosa Emmanuella Irorere is a pharmacist and the National Health Fellow
+                representing Egor Local Government Area. She conceived and led the development
+                of EgorPHCConnect as a practical digital solution to improve access to
+                information about Primary Healthcare Centres and the services they provide
+                across Egor LGA.
+              </p>
+              <p className="mt-3 text-sm text-muted-foreground sm:text-base">
+                Her focus is on making primary healthcare more visible, more accessible and
+                easier to navigate for the residents her community serves — helping families
+                reach the right facility, on the right day, for the right service.
               </p>
               <p className="mt-3 text-sm text-muted-foreground">
-                The project was developed under the National Health Fellows Programme.
+                EgorPHCConnect was developed as a project under the National Health Fellows Programme.
               </p>
             </div>
           </div>
         </section>
+
 
         {/* How info is managed */}
         <section>

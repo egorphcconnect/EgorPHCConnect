@@ -10,7 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { claimFirstAdmin } from "@/lib/admin-bootstrap.functions";
 import type { PHC, HealthArticle, DayKey } from "@/lib/types";
 import {
-  HEALTH_CATEGORIES,
   isOpenLagos, formatTime, DAY_KEYS, DAY_LABELS, dayServices,
 } from "@/lib/types";
 import { ServiceMultiSelect } from "@/components/service-multi-select";
@@ -120,9 +119,11 @@ function AdminPage() {
         <TabsList>
           <TabsTrigger value="phcs">PHCs</TabsTrigger>
           <TabsTrigger value="articles">Health Articles</TabsTrigger>
+          <TabsTrigger value="categories">Categories</TabsTrigger>
         </TabsList>
         <TabsContent value="phcs"><PhcManager /></TabsContent>
         <TabsContent value="articles"><ArticleManager /></TabsContent>
+        <TabsContent value="categories"><CategoryManager /></TabsContent>
       </Tabs>
     </div>
   );
@@ -665,21 +666,46 @@ function ArticleForm({ article, onClose, onSaved }: {
   article: ArticleRow | null; onClose: () => void; onSaved: () => void;
 }) {
   const editing = !!article;
+  const [categories, setCategories] = useState<string[]>([]);
   const [f, setF] = useState({
     title: article?.title ?? "",
-    category: article?.category ?? HEALTH_CATEGORIES[0],
+    category: article?.category ?? "",
     summary: article?.summary ?? "",
     content: article?.content ?? "",
     tags: (article?.tags ?? []).join(", "),
     published: article?.published ?? true,
   });
+  const [newCategory, setNewCategory] = useState("");
+  const [creatingCat, setCreatingCat] = useState(false);
   const [saving, setSaving] = useState(false);
+
+  async function loadCategories() {
+    const { data } = await supabase.from("article_categories").select("name").order("name");
+    const names = (data ?? []).map((r) => r.name as string);
+    setCategories(names);
+    if (!f.category && names.length > 0) setF((s) => ({ ...s, category: names[0] }));
+  }
+  useEffect(() => { loadCategories(); /* eslint-disable-next-line */ }, []);
+
+  async function addCategoryInline() {
+    const name = newCategory.trim();
+    if (!name) return;
+    setCreatingCat(true);
+    const { error } = await supabase.from("article_categories").insert({ name });
+    setCreatingCat(false);
+    if (error) { toast.error(error.message); return; }
+    toast.success(`Category "${name}" added`);
+    setNewCategory("");
+    await loadCategories();
+    setF((s) => ({ ...s, category: name }));
+  }
 
   async function save(e: React.FormEvent) {
     e.preventDefault();
     if (!f.title.trim() || !f.summary.trim() || !f.content.trim()) {
       toast.error("Title, summary and content are required"); return;
     }
+    if (!f.category.trim()) { toast.error("Please choose a category"); return; }
     setSaving(true);
     const payload = {
       title: f.title.trim(),
@@ -703,11 +729,25 @@ function ArticleForm({ article, onClose, onSaved }: {
         <DialogHeader><DialogTitle>{editing ? "Edit article" : "New article"}</DialogTitle></DialogHeader>
         <form onSubmit={save} className="space-y-3">
           <Field label="Title *"><Input value={f.title} onChange={(e) => setF({ ...f, title: e.target.value })} required /></Field>
-          <Field label="Category">
-            <Select value={f.category} onValueChange={(v) => setF({ ...f, category: v })}>
-              <SelectTrigger><SelectValue /></SelectTrigger>
-              <SelectContent>{HEALTH_CATEGORIES.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
-            </Select>
+          <Field label="Category *">
+            <div className="space-y-2">
+              <Select value={f.category} onValueChange={(v) => setF({ ...f, category: v })}>
+                <SelectTrigger><SelectValue placeholder="Choose a category" /></SelectTrigger>
+                <SelectContent>
+                  {categories.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+              <div className="flex gap-2">
+                <Input
+                  placeholder="Or create a new category (e.g. Health Insurance)"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                />
+                <Button type="button" variant="outline" onClick={addCategoryInline} disabled={creatingCat || !newCategory.trim()}>
+                  Add
+                </Button>
+              </div>
+            </div>
           </Field>
           <Field label="Summary *"><Textarea rows={2} value={f.summary} onChange={(e) => setF({ ...f, summary: e.target.value })} required /></Field>
           <Field label="Content *"><Textarea rows={8} value={f.content} onChange={(e) => setF({ ...f, content: e.target.value })} required /></Field>
@@ -725,3 +765,190 @@ function ArticleForm({ article, onClose, onSaved }: {
     </Dialog>
   );
 }
+
+// =================== CATEGORY MANAGER ===================
+type CategoryRow = { id: string; name: string };
+
+function CategoryManager() {
+  const [rows, setRows] = useState<CategoryRow[]>([]);
+  const [counts, setCounts] = useState<Record<string, number>>({});
+  const [loading, setLoading] = useState(true);
+  const [newName, setNewName] = useState("");
+  const [creating, setCreating] = useState(false);
+  const [editing, setEditing] = useState<CategoryRow | null>(null);
+  const [editName, setEditName] = useState("");
+  const [deleting, setDeleting] = useState<CategoryRow | null>(null);
+  const [reassignTo, setReassignTo] = useState<string>("");
+
+  async function load() {
+    setLoading(true);
+    const [cats, arts] = await Promise.all([
+      supabase.from("article_categories").select("id,name").order("name"),
+      supabase.from("health_articles").select("category"),
+    ]);
+    if (cats.error) toast.error(cats.error.message);
+    const list = (cats.data ?? []) as CategoryRow[];
+    setRows(list);
+    const map: Record<string, number> = {};
+    for (const a of (arts.data ?? []) as { category: string }[]) {
+      map[a.category] = (map[a.category] ?? 0) + 1;
+    }
+    setCounts(map);
+    setLoading(false);
+  }
+  useEffect(() => { load(); }, []);
+
+  async function addCategory() {
+    const name = newName.trim();
+    if (!name) return;
+    setCreating(true);
+    const { error } = await supabase.from("article_categories").insert({ name });
+    setCreating(false);
+    if (error) return toast.error(error.message);
+    toast.success("Category added");
+    setNewName("");
+    load();
+  }
+
+  async function saveEdit() {
+    if (!editing) return;
+    const name = editName.trim();
+    if (!name) return toast.error("Name is required");
+    if (name === editing.name) { setEditing(null); return; }
+    const oldName = editing.name;
+    const { error } = await supabase.from("article_categories").update({ name }).eq("id", editing.id);
+    if (error) return toast.error(error.message);
+    // Cascade rename onto articles that used the old label.
+    const { error: updErr } = await supabase.from("health_articles").update({ category: name }).eq("category", oldName);
+    if (updErr) toast.error(`Category renamed, but article update failed: ${updErr.message}`);
+    else toast.success("Category renamed");
+    setEditing(null);
+    load();
+  }
+
+  async function confirmDelete() {
+    if (!deleting) return;
+    const count = counts[deleting.name] ?? 0;
+    if (count > 0) {
+      if (!reassignTo) { toast.error("Choose a category to reassign articles to"); return; }
+      if (reassignTo === deleting.name) { toast.error("Choose a different category"); return; }
+      const { error: reErr } = await supabase.from("health_articles")
+        .update({ category: reassignTo }).eq("category", deleting.name);
+      if (reErr) return toast.error(reErr.message);
+    }
+    const { error } = await supabase.from("article_categories").delete().eq("id", deleting.id);
+    if (error) return toast.error(error.message);
+    toast.success("Category deleted");
+    setDeleting(null);
+    setReassignTo("");
+    load();
+  }
+
+  const otherCategories = deleting ? rows.filter((r) => r.id !== deleting.id) : [];
+
+  return (
+    <div className="space-y-4">
+      <div>
+        <h2 className="text-lg font-semibold">Article categories</h2>
+        <p className="text-sm text-muted-foreground">
+          Manage the topic tags used across the Health Information page. Renames update every article automatically.
+        </p>
+      </div>
+
+      <Card>
+        <CardHeader className="pb-2"><CardTitle className="text-base">Add new category</CardTitle></CardHeader>
+        <CardContent className="flex gap-2">
+          <Input
+            placeholder="e.g. Health Insurance"
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+          />
+          <Button onClick={addCategory} disabled={creating || !newName.trim()}>
+            <Plus className="mr-1 h-4 w-4" />Add
+          </Button>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-0">
+          {loading ? <div className="p-4"><Skeleton className="h-24 w-full" /></div>
+            : rows.length === 0 ? <div className="p-10 text-center text-sm text-muted-foreground">No categories yet.</div>
+            : (
+              <Table>
+                <TableHeader><TableRow>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Articles</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow></TableHeader>
+                <TableBody>
+                  {rows.map((c) => (
+                    <TableRow key={c.id}>
+                      <TableCell className="font-medium">{c.name}</TableCell>
+                      <TableCell>{counts[c.name] ?? 0}</TableCell>
+                      <TableCell className="text-right">
+                        <Button size="icon" variant="ghost" onClick={() => { setEditing(c); setEditName(c.name); }} aria-label="Edit"><Pencil className="h-4 w-4" /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => { setDeleting(c); setReassignTo(""); }} aria-label="Delete"><Trash2 className="h-4 w-4" /></Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+        </CardContent>
+      </Card>
+
+      {/* Edit dialog */}
+      <Dialog open={!!editing} onOpenChange={(o) => !o && setEditing(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Rename category</DialogTitle></DialogHeader>
+          <div className="space-y-2">
+            <Label>Name</Label>
+            <Input value={editName} onChange={(e) => setEditName(e.target.value)} />
+            <p className="text-xs text-muted-foreground">
+              All articles currently in "{editing?.name}" will be moved to the new name automatically.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditing(null)}>Cancel</Button>
+            <Button onClick={saveEdit}>Save</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete dialog */}
+      <Dialog open={!!deleting} onOpenChange={(o) => !o && setDeleting(null)}>
+        <DialogContent>
+          <DialogHeader><DialogTitle>Delete "{deleting?.name}"?</DialogTitle></DialogHeader>
+          {deleting && (
+            <div className="space-y-3 text-sm">
+              {(counts[deleting.name] ?? 0) > 0 ? (
+                <>
+                  <p className="text-foreground">
+                    <b>{counts[deleting.name]}</b> article{counts[deleting.name] === 1 ? "" : "s"} currently use this category.
+                    Choose a category to reassign them to before deletion.
+                  </p>
+                  <div className="space-y-1">
+                    <Label>Reassign articles to</Label>
+                    <Select value={reassignTo} onValueChange={setReassignTo}>
+                      <SelectTrigger><SelectValue placeholder="Choose category" /></SelectTrigger>
+                      <SelectContent>
+                        {otherCategories.map((c) => <SelectItem key={c.id} value={c.name}>{c.name}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </>
+              ) : (
+                <p className="text-muted-foreground">No articles use this category. It can be safely removed.</p>
+              )}
+            </div>
+          )}
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeleting(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={confirmDelete}>Delete category</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+

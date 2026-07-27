@@ -3,7 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { BookOpen } from "lucide-react";
 import { listArticles } from "@/lib/phcs.functions";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -12,8 +14,16 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import type { HealthArticle } from "@/lib/types";
-import { HEALTH_CATEGORIES } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+async function listCategories(): Promise<string[]> {
+  const { data, error } = await supabase
+    .from("article_categories")
+    .select("name")
+    .order("name");
+  if (error) return [];
+  return (data ?? []).map((r) => r.name);
+}
 
 export const Route = createFileRoute("/health")({
   head: () => ({
@@ -21,28 +31,43 @@ export const Route = createFileRoute("/health")({
       { title: "Health Information — Egor PHC Connect" },
       {
         name: "description",
-        content: "Trusted public health information for residents of Egor LGA: maternal health, immunization, malaria, HIV, nutrition and more.",
+        content: "Trusted public health information for residents of Egor LGA: maternal health, immunization, malaria, HIV, nutrition, health insurance and more.",
       },
       { property: "og:title", content: "Health Information — Egor LGA" },
       { property: "og:description", content: "Practical public health guidance from your local PHC network." },
     ],
   }),
   loader: async ({ context }) => {
-    await context.queryClient.ensureQueryData({ queryKey: ["articles"], queryFn: () => listArticles() });
+    await Promise.all([
+      context.queryClient.ensureQueryData({ queryKey: ["articles"], queryFn: () => listArticles() }),
+      context.queryClient.ensureQueryData({ queryKey: ["article-categories"], queryFn: () => listCategories() }),
+    ]);
   },
   component: Health,
 });
 
 function Health() {
   const { data: articles = [] } = useQuery({ queryKey: ["articles"], queryFn: () => listArticles() });
+  const { data: dbCategories = [] } = useQuery({ queryKey: ["article-categories"], queryFn: () => listCategories() });
   const [category, setCategory] = useState<string>("all");
+  const [q, setQ] = useState("");
   const [active, setActive] = useState<HealthArticle | null>(null);
 
+  // Union of DB-managed categories and any categories used by existing articles.
   const cats = useMemo(
-    () => ["all", ...Array.from(new Set([...HEALTH_CATEGORIES, ...articles.map((a) => a.category)]))],
-    [articles],
+    () => ["all", ...Array.from(new Set([...dbCategories, ...articles.map((a) => a.category)])).sort()],
+    [articles, dbCategories],
   );
-  const filtered = category === "all" ? articles : articles.filter((a) => a.category === category);
+
+  const filtered = articles.filter((a) => {
+    if (category !== "all" && a.category !== category) return false;
+    if (q.trim()) {
+      const needle = q.toLowerCase();
+      const hay = `${a.title} ${a.summary} ${a.content} ${a.tags.join(" ")}`.toLowerCase();
+      if (!hay.includes(needle)) return false;
+    }
+    return true;
+  });
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
@@ -51,7 +76,16 @@ function Health() {
         Practical, plain-language guidance to keep your family healthy.
       </p>
 
-      <div className="mt-5 flex flex-wrap gap-2">
+      <div className="mt-5">
+        <Input
+          placeholder="Search articles by title, keyword or tag…"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          className="max-w-md"
+        />
+      </div>
+
+      <div className="mt-4 flex flex-wrap gap-2">
         {cats.map((c) => (
           <button
             key={c}
@@ -69,7 +103,11 @@ function Health() {
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filtered.map((a) => (
+        {filtered.length === 0 ? (
+          <p className="col-span-full text-sm text-muted-foreground">
+            No articles match your search yet.
+          </p>
+        ) : filtered.map((a) => (
           <article
             key={a.id}
             className="flex flex-col rounded-xl border border-border bg-card p-5 shadow-[var(--shadow-card)]"
@@ -118,3 +156,4 @@ function Health() {
     </div>
   );
 }
+
