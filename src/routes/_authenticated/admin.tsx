@@ -10,7 +10,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { claimFirstAdmin } from "@/lib/admin-bootstrap.functions";
 import type { PHC, HealthArticle, DayKey } from "@/lib/types";
 import {
-  HEALTH_CATEGORIES,
   isOpenLagos, formatTime, DAY_KEYS, DAY_LABELS, dayServices,
 } from "@/lib/types";
 import { ServiceMultiSelect } from "@/components/service-multi-select";
