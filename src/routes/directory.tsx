@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
-import { Search, Filter, SearchX, LocateFixed, X, CalendarClock } from "lucide-react";
+import { Search, Filter, SearchX, LocateFixed, X, CalendarClock, SlidersHorizontal } from "lucide-react";
 import { z } from "zod";
 import { listPhcs } from "@/lib/phcs.functions";
 import { listServicesCatalog } from "@/lib/services.functions";
