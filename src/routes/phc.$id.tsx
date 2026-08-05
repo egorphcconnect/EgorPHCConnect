@@ -110,7 +110,7 @@ function PhcDetails() {
             ? "border-success/30 bg-success/10 text-success"
             : "border-muted-foreground/20 bg-muted text-muted-foreground"}
         >
-          {open ? "Open now" : "Closed"}
+          {open ? "Open now" : "Currently closed"}
         </Badge>
       </div>
 
