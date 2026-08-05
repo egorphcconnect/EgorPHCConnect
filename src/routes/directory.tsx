@@ -30,6 +30,7 @@ const searchSchema = z.object({
   dayMode: z.string().optional(),
   day: z.string().optional(),
   openNow: z.coerce.number().int().optional(),
+  status: z.string().optional(),
   nearest: z.coerce.number().int().optional(),
 });
 
