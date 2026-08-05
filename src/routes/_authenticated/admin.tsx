@@ -215,8 +215,8 @@ function PhcManager() {
           <SelectTrigger className="w-[160px]"><SelectValue placeholder="Status" /></SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Open & closed</SelectItem>
-            <SelectItem value="open">Open now</SelectItem>
-            <SelectItem value="closed">Closed</SelectItem>
+            <SelectItem value="open">Currently open</SelectItem>
+            <SelectItem value="closed">Currently closed</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -252,7 +252,7 @@ function PhcManager() {
                         {p.opening_time && p.closing_time ? `${formatTime(p.opening_time)} – ${formatTime(p.closing_time)}` : "—"}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={open ? "default" : "secondary"}>{open ? "Open now" : "Closed"}</Badge>
+                        <Badge variant={open ? "default" : "secondary"}>{open ? "Currently open" : "Currently closed"}</Badge>
                       </TableCell>
                       <TableCell className="hidden md:table-cell text-xs text-muted-foreground">
                         {new Date(p.updated_at ?? p.last_updated).toLocaleDateString()}
