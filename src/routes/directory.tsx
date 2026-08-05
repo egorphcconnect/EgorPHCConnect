@@ -326,8 +326,8 @@ function Directory() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All PHCs</SelectItem>
-                <SelectItem value="open">Open now</SelectItem>
-                <SelectItem value="closed">Closed now</SelectItem>
+                <SelectItem value="open">Currently open</SelectItem>
+                <SelectItem value="closed">Currently closed</SelectItem>
               </SelectContent>
             </Select>
             <p className="mt-1 text-xs text-muted-foreground">
