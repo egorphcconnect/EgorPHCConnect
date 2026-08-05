@@ -233,7 +233,8 @@ function Index() {
                           ? "shrink-0 border-success/30 bg-success/10 text-success"
                           : "shrink-0 border-muted-foreground/20 bg-muted text-muted-foreground"}
                       >
-                        {open ? "Open" : "Closed"}
+                        <span className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${open ? "bg-success" : "bg-muted-foreground"}`} aria-hidden />
+                        {open ? "Open now" : "Currently closed"}
                       </Badge>
                     </div>
                     <p className="mt-1 text-xs text-muted-foreground">

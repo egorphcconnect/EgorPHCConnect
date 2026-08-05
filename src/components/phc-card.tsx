@@ -39,7 +39,8 @@ export function PhcCard({ phc, distanceKm }: { phc: PHC; distanceKm?: number | n
                 : "shrink-0 border-muted-foreground/20 bg-muted text-muted-foreground"
             }
           >
-            {open ? "Open now" : "Closed"}
+            <span className={`mr-1.5 inline-block h-1.5 w-1.5 rounded-full ${open ? "bg-success" : "bg-muted-foreground"}`} aria-hidden />
+            {open ? "Open now" : "Currently closed"}
           </Badge>
         </div>
 
