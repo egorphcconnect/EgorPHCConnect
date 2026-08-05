@@ -175,7 +175,7 @@ function Directory() {
       withDist = [...withDist].sort((a, b) => a.phc.name.localeCompare(b.phc.name));
     }
     return withDist;
-  }, [phcs, q, service, ward, effectiveDay, dayMode, openOnly, sort, geo.coords]);
+  }, [phcs, q, service, ward, effectiveDay, dayMode, status, sort, geo.coords]);
 
   function updateUrl(patch: Record<string, string | number | undefined>) {
     navigate({ search: (s: Record<string, unknown>) => ({ ...s, ...patch }) });
@@ -183,13 +183,13 @@ function Directory() {
 
   function clearAll() {
     setQ(""); setService("all"); setWard("all"); setDayMode("today"); setDay(todayKey);
-    setOpenOnly(false); setSort("name");
+    setStatus("all"); setSort("name");
     navigate({ search: {} as never });
   }
 
   const activeFilters =
     (search.q ? 1 : 0) + (service !== "all" ? 1 : 0) + (ward !== "all" ? 1 : 0) +
-    (dayMode !== "today" ? 1 : 0) + (openOnly ? 1 : 0) + (sort === "distance" ? 1 : 0);
+    (dayMode !== "today" ? 1 : 0) + (status !== "all" ? 1 : 0) + (sort === "distance" ? 1 : 0);
 
   // Human context banner
   const dayContextLabel =
@@ -304,15 +304,37 @@ function Directory() {
           )}
         </div>
 
-        <div className="mt-3 flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Switch
-              id="open"
-              checked={openOnly}
-              onCheckedChange={(v) => { setOpenOnly(v); updateUrl({ openNow: v ? 1 : undefined }); }}
-            />
-            <Label htmlFor="open" className="text-sm">Open now</Label>
+        <div className="mt-3 flex flex-wrap items-end gap-3">
+          <div className="w-full sm:w-auto">
+            <Label htmlFor="facility-status" className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <SlidersHorizontal className="h-3.5 w-3.5" /> Facility Status
+            </Label>
+            <Select
+              value={status}
+              onValueChange={(v) => {
+                const next = v as "all" | "open" | "closed";
+                setStatus(next);
+                updateUrl({ status: next === "all" ? undefined : next, openNow: undefined });
+              }}
+            >
+              <SelectTrigger
+                id="facility-status"
+                aria-label="Filter PHCs by current operating status"
+                className={`mt-1 h-11 w-full sm:w-[220px] ${status !== "all" ? "border-primary bg-primary-soft/50 text-primary" : ""}`}
+              >
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All PHCs</SelectItem>
+                <SelectItem value="open">Open now</SelectItem>
+                <SelectItem value="closed">Closed now</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Filter PHCs by their current operating status.
+            </p>
           </div>
+
           <Select value={sort} onValueChange={(v) => setSort(v as "name" | "ward" | "distance")}>
             <SelectTrigger className="h-9 w-[180px]"><SelectValue /></SelectTrigger>
             <SelectContent>
