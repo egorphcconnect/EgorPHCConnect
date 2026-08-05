@@ -84,7 +84,10 @@ function Directory() {
     (search.dayMode as DayMode) ?? "today",
   );
   const [day, setDay] = useState<DayKey>((search.day as DayKey) ?? todayKey);
-  const [openOnly, setOpenOnly] = useState<boolean>(!!search.openNow);
+  const [status, setStatus] = useState<"all" | "open" | "closed">(
+    (search.status as "all" | "open" | "closed") ?? (search.openNow ? "open" : "all"),
+  );
+
   const [sort, setSort] = useState<"name" | "ward" | "distance">(
     search.nearest ? "distance" : "name",
   );
@@ -146,7 +149,8 @@ function Directory() {
     }
 
     if (ward !== "all") list = list.filter((p) => p.ward === ward);
-    if (openOnly) list = list.filter((p) => isOpenLagos(p.opening_time, p.closing_time));
+    if (status === "open") list = list.filter((p) => isOpenLagos(p.opening_time, p.closing_time));
+    else if (status === "closed") list = list.filter((p) => !isOpenLagos(p.opening_time, p.closing_time));
 
     let withDist = list.map((p) => {
       const distance =
