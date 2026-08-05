@@ -130,8 +130,8 @@ function Directory() {
 
     // DAY-AWARE SERVICE + SCHEDULE FILTERING
     if (effectiveDay) {
-      // In "today" or "specific day" mode, always require a scheduled clinic that day.
-      list = list.filter((p) => dayServices(p, effectiveDay).length > 0);
+      // Only narrow to that day's schedule when a specific service is requested,
+      // so every PHC stays listed when no service filter is active.
       if (service !== "all") {
         list = list.filter((p) =>
           dayServices(p, effectiveDay).some(
