@@ -35,6 +35,36 @@ export type Database = {
         }
         Relationships: []
       }
+      content_revisions: {
+        Row: {
+          created_at: string
+          entity: string
+          entity_id: string
+          id: string
+          snapshot: Json
+          updated_by: string | null
+          updated_by_email: string | null
+        }
+        Insert: {
+          created_at?: string
+          entity: string
+          entity_id: string
+          id?: string
+          snapshot: Json
+          updated_by?: string | null
+          updated_by_email?: string | null
+        }
+        Update: {
+          created_at?: string
+          entity?: string
+          entity_id?: string
+          id?: string
+          snapshot?: Json
+          updated_by?: string | null
+          updated_by_email?: string | null
+        }
+        Relationships: []
+      }
       feedback: {
         Row: {
           anonymous: boolean
@@ -112,6 +142,48 @@ export type Database = {
           summary?: string
           tags?: string[]
           title?: string
+        }
+        Relationships: []
+      }
+      page_sections: {
+        Row: {
+          body: string
+          created_at: string
+          display_order: number
+          heading: string
+          id: string
+          image_alt: string | null
+          image_url: string | null
+          page: string
+          published: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          display_order?: number
+          heading: string
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          page?: string
+          published?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          display_order?: number
+          heading?: string
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          page?: string
+          published?: boolean
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
@@ -217,6 +289,87 @@ export type Database = {
           created_at?: string
           id?: string
           name?: string
+        }
+        Relationships: []
+      }
+      site_content: {
+        Row: {
+          block_key: string
+          created_at: string
+          draft_value: string | null
+          id: string
+          page: string
+          updated_at: string
+          updated_by: string | null
+          value: string
+        }
+        Insert: {
+          block_key: string
+          created_at?: string
+          draft_value?: string | null
+          id?: string
+          page: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: string
+        }
+        Update: {
+          block_key?: string
+          created_at?: string
+          draft_value?: string | null
+          id?: string
+          page?: string
+          updated_at?: string
+          updated_by?: string | null
+          value?: string
+        }
+        Relationships: []
+      }
+      stakeholders: {
+        Row: {
+          created_at: string
+          description: string | null
+          display_order: number
+          id: string
+          image_alt: string | null
+          image_url: string | null
+          name: string
+          organization: string | null
+          published: boolean
+          role_title: string | null
+          statement: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          name: string
+          organization?: string | null
+          published?: boolean
+          role_title?: string | null
+          statement?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          display_order?: number
+          id?: string
+          image_alt?: string | null
+          image_url?: string | null
+          name?: string
+          organization?: string | null
+          published?: boolean
+          role_title?: string | null
+          statement?: string | null
+          updated_at?: string
+          updated_by?: string | null
         }
         Relationships: []
       }
