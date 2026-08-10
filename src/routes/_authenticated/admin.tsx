@@ -14,6 +14,8 @@ import {
 } from "@/lib/types";
 import { ServiceMultiSelect } from "@/components/service-multi-select";
 import { PhcImage, extractPhcImagePath } from "@/components/phc-image";
+import { SiteCopyManager } from "@/components/admin/site-copy-manager";
+import { StakeholderManager } from "@/components/admin/stakeholder-manager";
 
 
 import { Button } from "@/components/ui/button";
