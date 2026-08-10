@@ -116,14 +116,18 @@ function AdminPage() {
       </div>
 
       <Tabs defaultValue="phcs">
-        <TabsList>
+        <TabsList className="flex-wrap">
           <TabsTrigger value="phcs">PHCs</TabsTrigger>
           <TabsTrigger value="articles">Health Articles</TabsTrigger>
           <TabsTrigger value="categories">Categories</TabsTrigger>
+          <TabsTrigger value="content">Website Content</TabsTrigger>
+          <TabsTrigger value="stakeholders">Stakeholders</TabsTrigger>
         </TabsList>
         <TabsContent value="phcs"><PhcManager /></TabsContent>
         <TabsContent value="articles"><ArticleManager /></TabsContent>
         <TabsContent value="categories"><CategoryManager /></TabsContent>
+        <TabsContent value="content"><SiteCopyManager /></TabsContent>
+        <TabsContent value="stakeholders"><StakeholderManager /></TabsContent>
       </Tabs>
     </div>
   );
