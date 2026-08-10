@@ -1,0 +1,1 @@
+ALTER TABLE public.site_content ADD COLUMN IF NOT EXISTS draft_value text;
