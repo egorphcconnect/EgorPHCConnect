@@ -201,7 +201,7 @@ function StakeholderForm({
       await supabase.from("content_revisions").insert({
         entity: "stakeholders",
         entity_id: row.id,
-        snapshot: row as unknown as Record<string, unknown>,
+        snapshot: JSON.parse(JSON.stringify(row)),
         updated_by: u.user?.id ?? null,
         updated_by_email: u.user?.email ?? null,
       });
