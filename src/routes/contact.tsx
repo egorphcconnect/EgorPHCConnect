@@ -1,5 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { Mail, MessageSquare, Phone, MapPin } from "lucide-react";
+import { siteContentQuery, pageText } from "@/lib/cms";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -7,50 +9,57 @@ export const Route = createFileRoute("/contact")({
       { title: "Contact Us — Egor PHC Connect" },
       { name: "description", content: "Get in touch with EgorPHCConnect — corrections, partnership ideas, accessibility issues or feedback about Primary Healthcare Centres in Egor LGA." },
       { property: "og:title", content: "Contact Us — EgorPHCConnect" },
+      { property: "og:description", content: "Reach the EgorPHCConnect team about PHC corrections, partnerships or accessibility." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(siteContentQuery);
+  },
   component: Contact,
 });
 
 function Contact() {
+  const { data: content } = useQuery(siteContentQuery);
+  const t = pageText(content, "contact");
+  const emergency = t("emergency_number");
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
-      <h1 className="text-3xl font-bold text-foreground">Contact us</h1>
-      <p className="mt-3 text-muted-foreground">
-        We welcome corrections, partnership ideas and accessibility reports. The best way to
-        reach the team depends on what you'd like to share.
-      </p>
+      <h1 className="text-3xl font-bold text-foreground">{t("title")}</h1>
+      <p className="mt-3 text-muted-foreground">{t("intro")}</p>
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2">
         <Card
           icon={MessageSquare}
-          title="Share feedback about a PHC"
-          body="Use the anonymous feedback form to rate a facility and share comments. Feedback is reviewed regularly to improve service quality."
-          action={<Link to="/feedback" className="text-sm font-medium text-primary hover:underline">Open feedback form →</Link>}
+          title={t("card1_title")}
+          body={t("card1_body")}
+          action={<Link to="/feedback" className="text-sm font-medium text-primary hover:underline">{t("card1_action")}</Link>}
         />
         <Card
           icon={Mail}
-          title="General enquiries"
-          body="For partnership ideas, corrections to PHC information or accessibility reports, please reach us through the feedback form."
-          action={<Link to="/feedback" className="text-sm font-medium text-primary hover:underline">Open feedback form →</Link>}
+          title={t("card2_title")}
+          body={t("card2_body")}
+          action={<Link to="/feedback" className="text-sm font-medium text-primary hover:underline">{t("card2_action")}</Link>}
         />
         <Card
           icon={Phone}
-          title="Medical emergencies"
-          body="For urgent medical issues, do not contact us — call emergency services immediately or visit the nearest healthcare facility."
-          action={<a href="tel:112" className="text-sm font-medium text-primary hover:underline">Call 112</a>}
+          title={t("card3_title")}
+          body={t("card3_body")}
+          action={<a href={`tel:${emergency}`} className="text-sm font-medium text-primary hover:underline">{t("card3_action")}</a>}
         />
         <Card
           icon={MapPin}
-          title="Egor LGA"
-          body="EgorPHCConnect serves residents of Egor Local Government Area, Edo State, Nigeria. Browse the directory to find facilities near you."
-          action={<Link to="/directory" className="text-sm font-medium text-primary hover:underline">Open directory →</Link>}
+          title={t("card4_title")}
+          body={t("card4_body")}
+          action={<Link to="/directory" className="text-sm font-medium text-primary hover:underline">{t("card4_action")}</Link>}
         />
       </div>
 
       <p className="mt-8 text-xs text-muted-foreground">
-        The email address above is monitored on a best-effort basis. For privacy questions please
-        see our <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
+        {t("footnote")}{" "}
+        <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
       </p>
     </div>
   );
