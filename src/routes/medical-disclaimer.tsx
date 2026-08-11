@@ -1,5 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, PhoneCall, HeartPulse } from "lucide-react";
+import { siteContentQuery, pageText } from "@/lib/cms";
+import { RichText, parseBullets } from "@/components/rich-text";
 
 export const Route = createFileRoute("/medical-disclaimer")({
   head: () => ({
@@ -7,75 +10,63 @@ export const Route = createFileRoute("/medical-disclaimer")({
       { title: "Medical Disclaimer — Egor PHC Connect" },
       { name: "description", content: "EgorPHCConnect provides information only and does not replace professional medical advice. In an emergency call 112 or visit the nearest healthcare facility." },
       { property: "og:title", content: "Medical Disclaimer — EgorPHCConnect" },
+      { property: "og:description", content: "EgorPHCConnect provides information only and is not a substitute for professional medical advice." },
+      { property: "og:type", content: "article" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
+  loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(siteContentQuery);
+  },
   component: Disclaimer,
 });
 
 function Disclaimer() {
+  const { data: content } = useQuery(siteContentQuery);
+  const t = pageText(content, "medical-disclaimer");
+  const emergency = t("emergency_number");
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <div className="flex items-center gap-3">
-        <span className="grid h-12 w-12 place-items-center rounded-xl bg-warning/15 text-warning">
-          <AlertTriangle className="h-6 w-6" />
+        <span className="grid h-11 w-11 place-items-center rounded-xl bg-destructive/10 text-destructive">
+          <AlertTriangle className="h-5 w-5" />
         </span>
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Medical Disclaimer</h1>
-          <p className="text-sm text-muted-foreground">Please read carefully before using the information on this platform.</p>
+          <h1 className="text-3xl font-bold text-foreground">{t("title")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
       </div>
 
-      <section className="mt-8 space-y-4 text-sm leading-relaxed text-foreground">
-        <p>
-          <strong>EgorPHCConnect is an information platform.</strong> It is designed to help
-          residents of Egor Local Government Area locate Primary Healthcare Centres and learn
-          about the services they provide.
-        </p>
-        <p>
-          The content on this platform — including PHC listings, weekly clinic schedules,
-          opening hours and public health articles — is provided for general information only.
-          It does <strong>not</strong> constitute medical advice, diagnosis or treatment, and
-          should not be used as a substitute for professional healthcare.
-        </p>
-        <p>
-          Always seek the advice of a qualified healthcare professional with any questions you
-          may have about a medical condition or treatment. Never disregard professional medical
-          advice or delay seeking it because of something you read on EgorPHCConnect.
-        </p>
-        <p>
-          While we and our administrators make reasonable efforts to keep PHC information
-          accurate and current, services, schedules and contact details may change without
-          notice. Please confirm critical details directly with the facility before travel or
-          treatment.
-        </p>
+      <RichText text={t("body")} className="mt-8" />
+
+      <section className="mt-8 rounded-2xl border border-destructive/30 bg-destructive/5 p-5">
+        <h2 className="flex items-center gap-2 text-lg font-semibold text-foreground">
+          <PhoneCall className="h-5 w-5 text-destructive" /> {t("emergency_heading")}
+        </h2>
+        <p className="mt-2 text-sm text-muted-foreground">{t("emergency_body")}</p>
+        <a
+          href={`tel:${emergency}`}
+          className="mt-4 inline-flex h-11 items-center rounded-md bg-destructive px-5 text-sm font-medium text-destructive-foreground hover:bg-destructive/90"
+        >
+          <PhoneCall className="mr-2 h-4 w-4" /> Call {emergency}
+        </a>
       </section>
 
-      <div className="mt-8 rounded-xl border border-destructive/30 bg-destructive/5 p-5">
-        <h2 className="flex items-center gap-2 text-base font-semibold text-destructive">
-          <PhoneCall className="h-4 w-4" /> In a medical emergency
+      <section className="mt-8">
+        <h2 className="flex items-center gap-2 text-xl font-semibold text-foreground">
+          <HeartPulse className="h-5 w-5 text-primary" /> {t("consult_heading")}
         </h2>
-        <p className="mt-2 text-sm text-foreground">
-          If you or someone near you is experiencing a medical emergency, do not rely on this
-          platform. Call <a href="tel:112" className="font-semibold underline">112</a> immediately,
-          or go to the nearest hospital or healthcare facility without delay.
-        </p>
-      </div>
-
-      <div className="mt-8 rounded-xl border border-primary/30 bg-primary-soft/40 p-5">
-        <h2 className="flex items-center gap-2 text-base font-semibold text-primary">
-          <HeartPulse className="h-4 w-4" /> When to consult a healthcare professional
-        </h2>
-        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-foreground">
-          <li>Any new, severe or worsening symptoms.</li>
-          <li>Pregnancy-related concerns, fever in a child or a chronic condition that feels different.</li>
-          <li>Before starting, stopping or changing any medication or treatment.</li>
-          <li>Mental health concerns including thoughts of self-harm.</li>
+        <ul className="mt-3 list-disc space-y-1.5 pl-5 text-sm text-muted-foreground">
+          {parseBullets(t("consult_body")).map((line) => (
+            <li key={line}>{line}</li>
+          ))}
         </ul>
-      </div>
+      </section>
 
       <p className="mt-8 text-xs text-muted-foreground">
-        By using EgorPHCConnect you acknowledge and accept this disclaimer. See also our{" "}
-        <Link to="/terms" className="text-primary hover:underline">Terms and Conditions</Link> and{" "}
+        {t("footnote")}{" "}
+        <Link to="/terms" className="text-primary hover:underline">Terms and Conditions</Link>{" · "}
         <Link to="/privacy" className="text-primary hover:underline">Privacy Policy</Link>.
       </p>
     </div>
