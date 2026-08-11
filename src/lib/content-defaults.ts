@@ -171,27 +171,9 @@ export const CONTENT_PAGES: PageDef[] = [
       ),
       b("programme_logo", "Programme logo", "image", "", "Leave empty to use the built-in National Health Fellows logo."),
       b("programme_logo_alt", "Programme logo alt text", "text", "National Health Fellows Programme logo"),
-      b("lead_heading", "Project Lead section heading", "text", "Meet the Project Lead"),
-      b("lead_name", "Project Lead name", "text", "Dr. Eseosa Emmanuella Irorere, PharmD"),
-      b(
-        "lead_role",
-        "Project Lead role",
-        "text",
-        "Pharmacist · National Health Fellow, Egor LGA · Project Lead, EgorPHCConnect",
-      ),
-      b(
-        "lead_bio",
-        "Project Lead biography",
-        "richtext",
-        "Dr. Eseosa Emmanuella Irorere is a pharmacist and the National Health Fellow representing Egor Local Government Area. She conceived and led the development of EgorPHCConnect as a practical digital solution to improve access to information about Primary Healthcare Centres and the services they provide across Egor LGA.\n\nHer focus is on making primary healthcare more visible, more accessible and easier to navigate for the residents her community serves — helping families reach the right facility, on the right day, for the right service.\n\nEgorPHCConnect was developed as a project under the National Health Fellows Programme.",
-      ),
-      b("lead_image", "Project Lead photograph", "image", "", "Leave empty to use the current built-in photograph."),
-      b(
-        "lead_image_alt",
-        "Project Lead photo alt text",
-        "text",
-        "Portrait photograph of the Project Lead of EgorPHCConnect",
-      ),
+      // The "Meet the Project Visionary" section is intentionally NOT editable
+      // from the admin dashboard — it is fixed content in src/routes/about.tsx.
+
       b("stakeholders_heading", "Stakeholders section heading", "text", "Stakeholders"),
       b(
         "stakeholders_intro",
