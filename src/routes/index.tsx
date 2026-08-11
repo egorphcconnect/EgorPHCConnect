@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useSuspenseQuery } from "@tanstack/react-query";
+import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import {
   Search, MapPin, Megaphone, ArrowRight, Syringe, Baby, Pill, HeartPulse,
@@ -13,6 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { SERVICE_CATEGORIES, nowLagos, dayServices, DAY_LABELS, haversineKm, isOpenLagos } from "@/lib/types";
 import { useGeolocation } from "@/hooks/use-geolocation";
 import phcHero from "@/assets/phc-hero.png.asset.json";
+import { siteContentQuery, pageText } from "@/lib/cms";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -34,6 +35,7 @@ export const Route = createFileRoute("/")({
     await Promise.all([
       context.queryClient.ensureQueryData({ queryKey: ["phcs"], queryFn: () => listPhcs() }),
       context.queryClient.ensureQueryData({ queryKey: ["articles"], queryFn: () => listArticles() }),
+      context.queryClient.ensureQueryData(siteContentQuery),
     ]);
   },
   component: Index,
@@ -54,6 +56,8 @@ function Index() {
   const { data: phcs } = useSuspenseQuery({ queryKey: ["phcs"], queryFn: () => listPhcs() });
   const { data: articles } = useSuspenseQuery({ queryKey: ["articles"], queryFn: () => listArticles() });
   const geo = useGeolocation();
+  const { data: content } = useQuery(siteContentQuery);
+  const t = pageText(content, "home");
 
   const { dayKey } = nowLagos();
   const announcement = articles[0];
@@ -107,13 +111,13 @@ function Index() {
         <div className="mx-auto w-full max-w-6xl px-4 py-16 md:py-24">
           <div className="max-w-2xl text-primary-foreground">
             <span className="inline-flex animate-in fade-in slide-in-from-bottom-3 items-center rounded-full border border-secondary/40 bg-secondary/20 px-3 py-1 text-xs font-semibold text-white backdrop-blur duration-500">
-              Egor LGA · Edo State · Nigeria
+              {t("hero_eyebrow")}
             </span>
             <h1 className="mt-4 animate-in fade-in slide-in-from-bottom-4 text-3xl font-bold leading-tight text-white drop-shadow-md duration-700 sm:text-4xl md:text-5xl lg:text-6xl">
-              Find the Right Primary Healthcare Centre in Egor
+              {t("hero_heading")}
             </h1>
             <p className="mt-4 max-w-xl animate-in fade-in slide-in-from-bottom-4 text-base leading-relaxed text-white/95 drop-shadow duration-700 [animation-delay:150ms] sm:text-lg">
-              Find nearby Primary Healthcare Centres, explore available services, view clinic schedules, and get directions—all in one place.
+              {t("hero_subheading")}
             </p>
 
             <div className="mt-7 flex animate-in fade-in slide-in-from-bottom-4 flex-wrap gap-3 duration-700 [animation-delay:300ms]">
@@ -123,7 +127,7 @@ function Index() {
                 className="h-12 bg-secondary px-6 text-secondary-foreground shadow-lg hover:bg-secondary/90"
               >
                 <Link to="/directory">
-                  <Search className="h-4 w-4" /> Find a PHC
+                  <Search className="h-4 w-4" /> {t("hero_primary_cta")}
                 </Link>
               </Button>
               <Button
@@ -133,7 +137,7 @@ function Index() {
                 className="h-12 border-white/70 bg-white/10 px-6 text-white backdrop-blur hover:bg-white/20 hover:text-white"
               >
                 <Link to="/directory" search={{ nearest: 1 } as never}>
-                  <LocateFixed className="h-4 w-4" /> Find the Nearest PHC
+                  <LocateFixed className="h-4 w-4" /> {t("hero_secondary_cta")}
                 </Link>
               </Button>
             </div>
@@ -152,8 +156,8 @@ function Index() {
 
       {/* QUICK SERVICES */}
       <section id="quick-services" className="mx-auto max-w-6xl px-4 py-10">
-        <h2 className="text-xl font-semibold text-foreground">Quick services</h2>
-        <p className="mt-1 text-sm text-muted-foreground">Tap a service to find PHCs that offer it.</p>
+        <h2 className="text-xl font-semibold text-foreground">{t("services_heading")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t("services_intro")}</p>
         <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {SERVICE_CATEGORIES.map((s) => {
             const Icon = SERVICE_ICONS[s] ?? HeartPulse;
@@ -183,7 +187,7 @@ function Index() {
                 <CalendarClock className="h-5 w-5" />
               </span>
               <div>
-                <h2 className="text-xl font-semibold text-foreground">Today's available clinics</h2>
+                <h2 className="text-xl font-semibold text-foreground">{t("today_heading")}</h2>
                 <p className="text-sm text-muted-foreground">
                   PHCs scheduled to run a clinic on {DAY_LABELS[dayKey]}.
                 </p>
@@ -214,7 +218,7 @@ function Index() {
 
           {todayPhcs.length === 0 ? (
             <p className="mt-6 text-sm text-muted-foreground">
-              No PHCs report a scheduled clinic today. Many still run general consultation — call ahead to confirm.
+              {t("today_empty")}
             </p>
           ) : (
             <div className="mt-5 grid gap-3 md:grid-cols-2 lg:grid-cols-3">
@@ -285,7 +289,7 @@ function Index() {
               </span>
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-secondary-foreground/80">
-                  Public health announcement
+                  {t("announcement_label")}
                 </p>
                 <p className="mt-0.5 text-base font-semibold text-foreground">{announcement.title}</p>
                 <p className="mt-1 text-sm text-muted-foreground">{announcement.summary}</p>
@@ -305,13 +309,13 @@ function Index() {
       <section className="mx-auto max-w-6xl px-4 py-10">
         <div className="flex items-end justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-foreground">Featured PHCs</h2>
+            <h2 className="text-xl font-semibold text-foreground">{t("featured_heading")}</h2>
             <p className="mt-1 flex items-center gap-1 text-sm text-muted-foreground">
-              <MapPin className="h-4 w-4" /> Showing facilities in Egor LGA
+              <MapPin className="h-4 w-4" /> {t("featured_intro")}
             </p>
           </div>
           <Link to="/directory" className="text-sm font-medium text-primary hover:underline">
-            View all
+            {t("featured_link")}
           </Link>
         </div>
         <div className="mt-5 grid gap-4 md:grid-cols-2 lg:grid-cols-3">

@@ -1,3 +1,4 @@
+import { siteContentQuery, pageText } from "@/lib/cms";
 import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
@@ -37,6 +38,7 @@ export const Route = createFileRoute("/feedback")({
     ],
   }),
   loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(siteContentQuery);
     await context.queryClient.ensureQueryData({ queryKey: ["phcs"], queryFn: () => listPhcs() });
   },
   component: FeedbackPage,
@@ -46,6 +48,8 @@ function FeedbackPage() {
   const search = Route.useSearch();
   const router = useRouter();
   const { data: phcs = [] } = useQuery({ queryKey: ["phcs"], queryFn: () => listPhcs() });
+  const { data: content } = useQuery(siteContentQuery);
+  const t = pageText(content, "feedback");
 
   const [phcId, setPhcId] = useState<string>(search.phcId ?? "");
   const [serviceUsed, setServiceUsed] = useState<string>("");
@@ -70,10 +74,8 @@ function FeedbackPage() {
         <span className="inline-flex h-16 w-16 items-center justify-center rounded-full bg-secondary-soft text-secondary">
           <CheckCircle2 className="h-8 w-8" />
         </span>
-        <h1 className="mt-5 text-2xl font-bold text-foreground">Thank you</h1>
-        <p className="mt-2 text-muted-foreground">
-          Your feedback helps Egor LGA improve healthcare for everyone. It is anonymous and confidential.
-        </p>
+        <h1 className="mt-5 text-2xl font-bold text-foreground">{t("thanks_title")}</h1>
+        <p className="mt-2 text-muted-foreground">{t("thanks_body")}</p>
         <div className="mt-6 flex justify-center gap-2">
           <Button asChild>
             <Link to="/directory">Find another PHC</Link>
@@ -119,10 +121,8 @@ function FeedbackPage() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-foreground md:text-3xl">Share your feedback</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Anonymous and takes under a minute. Your input helps improve care in Egor LGA.
-      </p>
+      <h1 className="text-2xl font-bold text-foreground md:text-3xl">{t("title")}</h1>
+      <p className="mt-1 text-sm text-muted-foreground">{t("intro")}</p>
 
       <form
         onSubmit={onSubmit}

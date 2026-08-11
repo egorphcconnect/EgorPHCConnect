@@ -1,18 +1,20 @@
 import { Link } from "@tanstack/react-router";
+import { useQuery } from "@tanstack/react-query";
+import { siteContentQuery, pageText } from "@/lib/cms";
 import nhfLogo from "@/assets/nhf-logo.jpg.asset.json";
 
 const APP_VERSION = "1.2.0";
 const LAST_UPDATED = "23 July 2026";
 
 export function SiteFooter() {
+  const { data: content } = useQuery(siteContentQuery);
+  const t = pageText(content, "footer");
   return (
     <footer className="mt-16 border-t border-border bg-muted/40">
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-4">
         <div className="md:col-span-1">
-          <h3 className="text-sm font-semibold text-foreground">EgorPHCConnect</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            A community health directory for Egor Local Government Area, Edo State, Nigeria.
-          </p>
+          <h3 className="text-sm font-semibold text-foreground">{t("brand")}</h3>
+          <p className="mt-2 text-sm text-muted-foreground">{t("tagline")}</p>
         </div>
         <div>
           <h4 className="text-sm font-semibold text-foreground">Explore</h4>
@@ -34,10 +36,8 @@ export function SiteFooter() {
           </ul>
         </div>
         <div>
-          <h4 className="text-sm font-semibold text-foreground">Programme support</h4>
-          <p className="mt-2 text-xs text-muted-foreground">
-            Powered by the National Health Fellows Programme.
-          </p>
+          <h4 className="text-sm font-semibold text-foreground">{t("programme_heading")}</h4>
+          <p className="mt-2 text-xs text-muted-foreground">{t("programme_text")}</p>
           <a
             href="https://nationalhealthfellows.ng"
             target="_blank"
@@ -59,7 +59,7 @@ export function SiteFooter() {
 
       <div className="border-t border-border">
         <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-2 px-4 py-4 text-xs text-muted-foreground sm:flex-row">
-          <p>© {new Date().getFullYear()} EgorPHCConnect · A National Health Fellows Programme project</p>
+          <p>© {new Date().getFullYear()} {t("copyright")}</p>
           <p>Version {APP_VERSION} · Last updated {LAST_UPDATED}</p>
         </div>
       </div>

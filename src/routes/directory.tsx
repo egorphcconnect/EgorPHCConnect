@@ -1,3 +1,4 @@
+import { siteContentQuery, pageText } from "@/lib/cms";
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
@@ -45,6 +46,7 @@ export const Route = createFileRoute("/directory")({
     ],
   }),
   loader: async ({ context }) => {
+    await context.queryClient.ensureQueryData(siteContentQuery);
     await Promise.all([
       context.queryClient.ensureQueryData({ queryKey: ["phcs"], queryFn: () => listPhcs() }),
       context.queryClient.ensureQueryData({ queryKey: ["services_catalog"], queryFn: () => listServicesCatalog() }),
@@ -74,6 +76,8 @@ function Directory() {
   const navigate = Route.useNavigate();
   const { data: phcs, isLoading } = useQuery({ queryKey: ["phcs"], queryFn: () => listPhcs() });
   const { data: catalog = [] } = useQuery({ queryKey: ["services_catalog"], queryFn: () => listServicesCatalog() });
+  const { data: content } = useQuery(siteContentQuery);
+  const t = pageText(content, "directory");
   const geo = useGeolocation();
   const { dayKey: todayKey } = nowLagos();
 
@@ -205,11 +209,8 @@ function Directory() {
     <div className="mx-auto max-w-6xl px-4 py-8">
       <div className="mb-2 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground md:text-3xl">PHC Directory</h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Search by service, ward or day. Results default to services available today
-            in Africa/Lagos time.
-          </p>
+          <h1 className="text-2xl font-bold text-foreground md:text-3xl">{t("title")}</h1>
+          <p className="mt-1 text-sm text-muted-foreground">{t("intro")}</p>
         </div>
         {geo.status === "granted" ? (
           <Badge variant="outline" className="border-success/30 bg-success/10 text-success">
@@ -240,7 +241,7 @@ function Directory() {
                 id="search"
                 value={q}
                 onChange={(e) => { setQ(e.target.value); updateUrl({ q: e.target.value || undefined }); }}
-                placeholder="Search by name, ward, address or service"
+                placeholder={t("search_placeholder")}
                 className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
               />
             </div>
@@ -331,7 +332,7 @@ function Directory() {
               </SelectContent>
             </Select>
             <p className="mt-1 text-xs text-muted-foreground">
-              Filter PHCs by their current operating status.
+              {t("status_help")}
             </p>
           </div>
 
@@ -391,7 +392,7 @@ function Directory() {
                   : dayMode === "day"
                   ? `No PHCs offer ${serviceLabel} on ${DAY_LABELS[day]}.`
                   : `No PHCs currently offer ${serviceLabel}.`
-                : "No PHCs match your filters"}
+                : t("empty_message")}
             </h3>
             <p className="mt-1 text-sm text-muted-foreground">
               Try a different day, ward or service — or view the full weekly schedule.
