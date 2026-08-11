@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
+import { siteContentQuery, pageText } from "@/lib/cms";
 import { useMemo, useState } from "react";
 import { BookOpen } from "lucide-react";
 import { listArticles } from "@/lib/phcs.functions";
@@ -39,6 +40,7 @@ export const Route = createFileRoute("/health")({
   }),
   loader: async ({ context }) => {
     await Promise.all([
+      context.queryClient.ensureQueryData(siteContentQuery),
       context.queryClient.ensureQueryData({ queryKey: ["articles"], queryFn: () => listArticles() }),
       context.queryClient.ensureQueryData({ queryKey: ["article-categories"], queryFn: () => listCategories() }),
     ]);
@@ -49,6 +51,8 @@ export const Route = createFileRoute("/health")({
 function Health() {
   const { data: articles = [] } = useQuery({ queryKey: ["articles"], queryFn: () => listArticles() });
   const { data: dbCategories = [] } = useQuery({ queryKey: ["article-categories"], queryFn: () => listCategories() });
+  const { data: content } = useQuery(siteContentQuery);
+  const t = pageText(content, "health");
   const [category, setCategory] = useState<string>("all");
   const [q, setQ] = useState("");
   const [active, setActive] = useState<HealthArticle | null>(null);
@@ -71,14 +75,12 @@ function Health() {
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-8">
-      <h1 className="text-2xl font-bold text-foreground md:text-3xl">Health information</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Practical, plain-language guidance to keep your family healthy.
-      </p>
+      <h1 className="text-2xl font-bold text-foreground md:text-3xl">{t("title")}</h1>
+      <p className="mt-1 text-sm text-muted-foreground">{t("intro")}</p>
 
       <div className="mt-5">
         <Input
-          placeholder="Search articles by title, keyword or tag…"
+          placeholder={t("search_placeholder")}
           value={q}
           onChange={(e) => setQ(e.target.value)}
           className="max-w-md"
@@ -105,7 +107,7 @@ function Health() {
       <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {filtered.length === 0 ? (
           <p className="col-span-full text-sm text-muted-foreground">
-            No articles match your search yet.
+            {t("empty_message")}
           </p>
         ) : filtered.map((a) => (
           <article
