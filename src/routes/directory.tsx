@@ -76,6 +76,8 @@ function Directory() {
   const navigate = Route.useNavigate();
   const { data: phcs, isLoading } = useQuery({ queryKey: ["phcs"], queryFn: () => listPhcs() });
   const { data: catalog = [] } = useQuery({ queryKey: ["services_catalog"], queryFn: () => listServicesCatalog() });
+  const { data: content } = useQuery(siteContentQuery);
+  const t = pageText(content, "directory");
   const geo = useGeolocation();
   const { dayKey: todayKey } = nowLagos();
 

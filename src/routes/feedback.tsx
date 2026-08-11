@@ -48,6 +48,8 @@ function FeedbackPage() {
   const search = Route.useSearch();
   const router = useRouter();
   const { data: phcs = [] } = useQuery({ queryKey: ["phcs"], queryFn: () => listPhcs() });
+  const { data: content } = useQuery(siteContentQuery);
+  const t = pageText(content, "feedback");
 
   const [phcId, setPhcId] = useState<string>(search.phcId ?? "");
   const [serviceUsed, setServiceUsed] = useState<string>("");
