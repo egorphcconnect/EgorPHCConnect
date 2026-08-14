@@ -145,6 +145,151 @@ export type Database = {
         }
         Relationships: []
       }
+      news_categories: {
+        Row: {
+          created_at: string
+          description: string
+          display_order: number
+          id: string
+          name: string
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          display_order?: number
+          id?: string
+          name: string
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          display_order?: number
+          id?: string
+          name?: string
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      news_images: {
+        Row: {
+          created_at: string
+          display_order: number
+          id: string
+          image_alt: string
+          image_url: string
+          post_id: string
+        }
+        Insert: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_alt?: string
+          image_url: string
+          post_id: string
+        }
+        Update: {
+          created_at?: string
+          display_order?: number
+          id?: string
+          image_alt?: string
+          image_url?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_images_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "news_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      news_posts: {
+        Row: {
+          call_to_action_text: string | null
+          call_to_action_url: string | null
+          category_id: string | null
+          contact_information: string | null
+          content: string
+          created_at: string
+          created_by: string | null
+          event_date: string | null
+          event_time: string | null
+          featured: boolean
+          featured_image: string | null
+          featured_image_alt: string | null
+          id: string
+          location: string | null
+          published_at: string | null
+          slug: string
+          status: string
+          summary: string
+          title: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          call_to_action_text?: string | null
+          call_to_action_url?: string | null
+          category_id?: string | null
+          contact_information?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          event_date?: string | null
+          event_time?: string | null
+          featured?: boolean
+          featured_image?: string | null
+          featured_image_alt?: string | null
+          id?: string
+          location?: string | null
+          published_at?: string | null
+          slug: string
+          status?: string
+          summary?: string
+          title: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          call_to_action_text?: string | null
+          call_to_action_url?: string | null
+          category_id?: string | null
+          contact_information?: string | null
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          event_date?: string | null
+          event_time?: string | null
+          featured?: boolean
+          featured_image?: string | null
+          featured_image_alt?: string | null
+          id?: string
+          location?: string | null
+          published_at?: string | null
+          slug?: string
+          status?: string
+          summary?: string
+          title?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "news_posts_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "news_categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_sections: {
         Row: {
           body: string
