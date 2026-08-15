@@ -24,6 +24,7 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as NewsIndexRouteImport } from './routes/news.index'
+import { Route as NewsSlugRouteImport } from './routes/news.$slug'
 import { Route as PhcIdRouteImport } from './routes/phc.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -100,6 +101,11 @@ const NewsIndexRoute = NewsIndexRouteImport.update({
   path: '/news/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NewsSlugRoute = NewsSlugRouteImport.update({
+  id: '/news/$slug',
+  path: '/news/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PhcIdRoute = PhcIdRouteImport.update({
   id: '/phc/$id',
   path: '/phc/$id',
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/news/$slug': typeof NewsSlugRoute
   '/phc/$id': typeof PhcIdRoute
   '/news/': typeof NewsIndexRoute
 }
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/admin': typeof AuthenticatedAdminRoute
+  '/news/$slug': typeof NewsSlugRoute
   '/phc/$id': typeof PhcIdRoute
   '/news': typeof NewsIndexRoute
 }
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/terms': typeof TermsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/news/$slug': typeof NewsSlugRoute
   '/phc/$id': typeof PhcIdRoute
   '/news/': typeof NewsIndexRoute
 }
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/admin'
+    | '/news/$slug'
     | '/phc/$id'
     | '/news/'
   fileRoutesByTo: FileRoutesByTo
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/admin'
+    | '/news/$slug'
     | '/phc/$id'
     | '/news'
   id:
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/terms'
     | '/_authenticated/admin'
+    | '/news/$slug'
     | '/phc/$id'
     | '/news/'
   fileRoutesById: FileRoutesById
@@ -228,6 +240,7 @@ export interface RootRouteChildren {
   PrivacyRoute: typeof PrivacyRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   TermsRoute: typeof TermsRoute
+  NewsSlugRoute: typeof NewsSlugRoute
   PhcIdRoute: typeof PhcIdRoute
   NewsIndexRoute: typeof NewsIndexRoute
 }
@@ -339,6 +352,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof NewsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/news/$slug': {
+      id: '/news/$slug'
+      path: '/news/$slug'
+      fullPath: '/news/$slug'
+      preLoaderRoute: typeof NewsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/phc/$id': {
       id: '/phc/$id'
       path: '/phc/$id'
@@ -374,6 +394,7 @@ const rootRouteChildren: RootRouteChildren = {
   PrivacyRoute: PrivacyRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   TermsRoute: TermsRoute,
+  NewsSlugRoute: NewsSlugRoute,
   PhcIdRoute: PhcIdRoute,
   NewsIndexRoute: NewsIndexRoute,
 }
