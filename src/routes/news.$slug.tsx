@@ -7,6 +7,7 @@ import { EventTimingBadge, NewsCard } from "@/components/news-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
+  absoluteImageUrl,
   formatEventDate,
   formatPublishedAt,
   newsBySlugQuery,
@@ -23,7 +24,7 @@ export const Route = createFileRoute("/news/$slug")({
     return {
       title: data.post.title,
       summary: data.post.summary,
-      image: data.post.featured_image,
+      image: await absoluteImageUrl(data.post.featured_image),
     };
   },
   head: ({ loaderData }) => {
@@ -41,6 +42,12 @@ export const Route = createFileRoute("/news/$slug")({
         { property: "og:description", content: description },
         { property: "og:type", content: "article" },
         { name: "twitter:card", content: "summary_large_image" },
+        ...(loaderData.image
+          ? [
+              { property: "og:image", content: loaderData.image },
+              { name: "twitter:image", content: loaderData.image },
+            ]
+          : []),
       ],
     };
   },

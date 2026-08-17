@@ -128,7 +128,7 @@ export function NewsManager() {
   }, [rows, q, statusFilter]);
 
   async function setStatus(post: NewsPostWithCategory, status: NewsStatus) {
-    const patch: Record<string, unknown> = { status };
+    const patch: { status: NewsStatus; published_at?: string } = { status };
     if (status === "published" && !post.published_at) patch.published_at = new Date().toISOString();
     const { error } = await supabase.from("news_posts").update(patch).eq("id", post.id);
     if (error) { toast.error(error.message); return; }

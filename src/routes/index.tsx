@@ -14,6 +14,8 @@ import { SERVICE_CATEGORIES, nowLagos, dayServices, DAY_LABELS, haversineKm, isO
 import { useGeolocation } from "@/hooks/use-geolocation";
 import phcHero from "@/assets/phc-hero.png.asset.json";
 import { siteContentQuery, pageText } from "@/lib/cms";
+import { featuredNewsQuery } from "@/lib/news";
+import { NewsCard } from "@/components/news-card";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -36,6 +38,7 @@ export const Route = createFileRoute("/")({
       context.queryClient.ensureQueryData({ queryKey: ["phcs"], queryFn: () => listPhcs() }),
       context.queryClient.ensureQueryData({ queryKey: ["articles"], queryFn: () => listArticles() }),
       context.queryClient.ensureQueryData(siteContentQuery),
+      context.queryClient.ensureQueryData(featuredNewsQuery(3)),
     ]);
   },
   component: Index,
@@ -57,6 +60,7 @@ function Index() {
   const { data: articles } = useSuspenseQuery({ queryKey: ["articles"], queryFn: () => listArticles() });
   const geo = useGeolocation();
   const { data: content } = useQuery(siteContentQuery);
+  const { data: latestNews = [] } = useQuery(featuredNewsQuery(3));
   const t = pageText(content, "home");
 
   const { dayKey } = nowLagos();
@@ -304,6 +308,38 @@ function Index() {
           </div>
         ) : null}
       </section>
+
+      {/* LATEST NEWS & ANNOUNCEMENTS */}
+      {latestNews.length > 0 && (
+        <section className="mx-auto max-w-6xl px-4 pt-10">
+          <div className="flex flex-wrap items-end justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-primary text-primary-foreground">
+                <Megaphone className="h-5 w-5" aria-hidden />
+              </span>
+              <div>
+                <h2 className="text-xl font-semibold text-foreground">Latest News &amp; Announcements</h2>
+                <p className="text-sm text-muted-foreground">
+                  Outreaches, campaigns and updates from the PHC network in Egor LGA.
+                </p>
+              </div>
+            </div>
+            <Link to="/news" className="text-sm font-medium text-primary hover:underline">
+              View all News &amp; Announcements
+            </Link>
+          </div>
+          <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {latestNews.map((p) => (
+              <NewsCard key={p.id} post={p} />
+            ))}
+          </div>
+          <div className="mt-6">
+            <Button asChild variant="outline">
+              <Link to="/news">View all News &amp; Announcements</Link>
+            </Button>
+          </div>
+        </section>
+      )}
 
       {/* NEARBY PHCs */}
       <section className="mx-auto max-w-6xl px-4 py-10">

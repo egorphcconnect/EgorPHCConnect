@@ -16,6 +16,7 @@ import { ServiceMultiSelect } from "@/components/service-multi-select";
 import { PhcImage, extractPhcImagePath } from "@/components/phc-image";
 import { SiteCopyManager } from "@/components/admin/site-copy-manager";
 import { StakeholderManager } from "@/components/admin/stakeholder-manager";
+import { NewsManager } from "@/components/admin/news-manager";
 
 
 import { Button } from "@/components/ui/button";
@@ -122,12 +123,14 @@ function AdminPage() {
           <TabsTrigger value="phcs">PHCs</TabsTrigger>
           <TabsTrigger value="articles">Health Articles</TabsTrigger>
           <TabsTrigger value="categories">Categories</TabsTrigger>
+          <TabsTrigger value="news">News &amp; Announcements</TabsTrigger>
           <TabsTrigger value="content">Website Content</TabsTrigger>
           <TabsTrigger value="stakeholders">Stakeholders</TabsTrigger>
         </TabsList>
         <TabsContent value="phcs"><PhcManager /></TabsContent>
         <TabsContent value="articles"><ArticleManager /></TabsContent>
         <TabsContent value="categories"><CategoryManager /></TabsContent>
+        <TabsContent value="news"><NewsManager /></TabsContent>
         <TabsContent value="content"><SiteCopyManager /></TabsContent>
         <TabsContent value="stakeholders"><StakeholderManager /></TabsContent>
       </Tabs>
