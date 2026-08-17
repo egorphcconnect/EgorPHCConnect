@@ -60,6 +60,7 @@ function Index() {
   const { data: articles } = useSuspenseQuery({ queryKey: ["articles"], queryFn: () => listArticles() });
   const geo = useGeolocation();
   const { data: content } = useQuery(siteContentQuery);
+  const { data: latestNews = [] } = useQuery(featuredNewsQuery(3));
   const t = pageText(content, "home");
 
   const { dayKey } = nowLagos();
