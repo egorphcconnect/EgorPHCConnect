@@ -38,6 +38,7 @@ export const Route = createFileRoute("/")({
       context.queryClient.ensureQueryData({ queryKey: ["phcs"], queryFn: () => listPhcs() }),
       context.queryClient.ensureQueryData({ queryKey: ["articles"], queryFn: () => listArticles() }),
       context.queryClient.ensureQueryData(siteContentQuery),
+      context.queryClient.ensureQueryData(featuredNewsQuery(3)),
     ]);
   },
   component: Index,
