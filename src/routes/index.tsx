@@ -14,6 +14,8 @@ import { SERVICE_CATEGORIES, nowLagos, dayServices, DAY_LABELS, haversineKm, isO
 import { useGeolocation } from "@/hooks/use-geolocation";
 import phcHero from "@/assets/phc-hero.png.asset.json";
 import { siteContentQuery, pageText } from "@/lib/cms";
+import { featuredNewsQuery } from "@/lib/news";
+import { NewsCard } from "@/components/news-card";
 
 export const Route = createFileRoute("/")({
   head: () => ({
