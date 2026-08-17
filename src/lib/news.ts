@@ -244,3 +244,22 @@ export async function fetchNewsImages(postId: string): Promise<NewsImage[]> {
   if (error) return [];
   return (data ?? []) as NewsImage[];
 }
+
+/* ------------------------- social sharing images ------------------------- */
+
+import { extractPhcImagePath } from "@/components/phc-image";
+
+const OG_TTL = 60 * 60 * 24 * 365; // 1 year
+
+/**
+ * Resolve a stored image reference into an absolute URL usable in Open Graph
+ * tags. Returns null when no image is set or the URL cannot be produced.
+ */
+export async function absoluteImageUrl(value: string | null | undefined): Promise<string | null> {
+  if (!value) return null;
+  const path = extractPhcImagePath(value);
+  if (!path) return /^https?:\/\//i.test(value) ? value : null;
+  const { data, error } = await supabase.storage.from("phc-images").createSignedUrl(path, OG_TTL);
+  if (error || !data) return null;
+  return data.signedUrl;
+}
