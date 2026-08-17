@@ -3,7 +3,7 @@ import { useSuspenseQuery, useQuery } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import {
   Search, MapPin, Megaphone, ArrowRight, Syringe, Baby, Pill, HeartPulse,
-  ShieldPlus, Users, CalendarClock, Navigation, LocateFixed, ChevronDown, Megaphone as MegaphoneIcon,
+  ShieldPlus, Users, CalendarClock, Navigation, LocateFixed, ChevronDown,
 } from "lucide-react";
 import { listPhcs, listArticles } from "@/lib/phcs.functions";
 import { PhcCard } from "@/components/phc-card";
