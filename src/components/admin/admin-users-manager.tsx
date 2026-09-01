@@ -75,8 +75,8 @@ export function AdminUsersManager() {
           <div>
             <CardTitle>Administrators</CardTitle>
             <CardDescription>
-              Grant or remove admin access. The person must sign in once at the staff sign-in page first,
-              then you can add their email here.
+              Grant or remove admin access. The person must create an account and confirm their email
+              before they can sign in. Adding an email here grants permissions but does not bypass verification.
             </CardDescription>
           </div>
           <Button variant="outline" size="sm" onClick={() => void reload()}>
