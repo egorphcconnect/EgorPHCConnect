@@ -1,16 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
-
-async function assertAdmin(context: { supabase: any; userId: string }) {
-  const { data, error } = await context.supabase
-    .from("user_roles")
-    .select("id")
-    .eq("user_id", context.userId)
-    .eq("role", "admin")
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  if (!data) throw new Error("Forbidden: admin access required");
-}
+import { assertAdmin } from "@/lib/admins-helpers";
 
 export type AdminUser = { userId: string; email: string; isSelf: boolean };
 

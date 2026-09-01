@@ -17,6 +17,7 @@ import { PhcImage, extractPhcImagePath } from "@/components/phc-image";
 import { SiteCopyManager } from "@/components/admin/site-copy-manager";
 import { StakeholderManager } from "@/components/admin/stakeholder-manager";
 import { NewsManager } from "@/components/admin/news-manager";
+import { AdminUsersManager } from "@/components/admin/admin-users-manager";
 
 
 import { Button } from "@/components/ui/button";
@@ -126,6 +127,7 @@ function AdminPage() {
           <TabsTrigger value="news">News &amp; Announcements</TabsTrigger>
           <TabsTrigger value="content">Website Content</TabsTrigger>
           <TabsTrigger value="stakeholders">Stakeholders</TabsTrigger>
+          <TabsTrigger value="admins">Administrators</TabsTrigger>
         </TabsList>
         <TabsContent value="phcs"><PhcManager /></TabsContent>
         <TabsContent value="articles"><ArticleManager /></TabsContent>
@@ -133,6 +135,7 @@ function AdminPage() {
         <TabsContent value="news"><NewsManager /></TabsContent>
         <TabsContent value="content"><SiteCopyManager /></TabsContent>
         <TabsContent value="stakeholders"><StakeholderManager /></TabsContent>
+        <TabsContent value="admins"><AdminUsersManager /></TabsContent>
       </Tabs>
     </div>
   );
