@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { MailCheck } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
@@ -36,17 +37,36 @@ function AuthPage() {
     navigate({ to: "/admin" });
   }
 
+  async function resendConfirmation() {
+    const normalizedEmail = email.trim();
+    if (!normalizedEmail) {
+      toast.error("Enter your email address first");
+      return;
+    }
+
+    setBusy(true);
+    const { error } = await supabase.auth.resend({
+      type: "signup",
+      email: normalizedEmail,
+      options: { emailRedirectTo: `${window.location.origin}/auth` },
+    });
+    setBusy(false);
+
+    if (error) return toast.error(error.message);
+    toast.success("Confirmation email sent. Check your inbox and spam folder.");
+  }
+
   async function signUp(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${window.location.origin}/admin` },
+      options: { emailRedirectTo: `${window.location.origin}/auth` },
     });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Account created. You can sign in now.");
+    toast.success("Account created. Check your email to confirm your account before signing in.");
   }
 
   async function google() {
@@ -87,6 +107,16 @@ function AuthPage() {
                   <Input id="pi" type="password" required value={password} onChange={(e) => setPassword(e.target.value)} />
                 </div>
                 <Button type="submit" disabled={busy} className="w-full">{busy ? "…" : "Sign in"}</Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  disabled={busy}
+                  onClick={() => void resendConfirmation()}
+                  className="w-full"
+                >
+                  <MailCheck className="mr-2 h-4 w-4" />
+                  Resend confirmation email
+                </Button>
               </form>
             </TabsContent>
             <TabsContent value="signup">
