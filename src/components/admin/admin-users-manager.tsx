@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import type { FormEvent } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { toast } from "sonner";
 import { RefreshCw, ShieldPlus, ShieldMinus } from "lucide-react";
@@ -40,7 +41,7 @@ export function AdminUsersManager() {
 
   useEffect(() => { void reload(); }, [reload]);
 
-  async function onGrant(e: React.FormEvent) {
+  async function onGrant(e: FormEvent) {
     e.preventDefault();
     setBusy(true);
     try {
