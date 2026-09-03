@@ -8,6 +8,7 @@ import {
 
 import { supabase } from "@/integrations/supabase/client";
 import { claimFirstAdmin } from "@/lib/admin-bootstrap.functions";
+import { getAdminAccess } from "@/lib/admins.functions";
 import type { PHC, HealthArticle, DayKey } from "@/lib/types";
 import {
   isOpenLagos, formatTime, DAY_KEYS, DAY_LABELS, dayServices,
@@ -52,6 +53,7 @@ const FACILITY_TYPES = ["Primary Health Centre", "Health Post", "Comprehensive H
 function AdminPage() {
   const navigate = useNavigate();
   const claim = useServerFn(claimFirstAdmin);
+  const verifyAdmin = useServerFn(getAdminAccess);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [userEmail, setUserEmail] = useState<string | null>(null);
@@ -61,19 +63,19 @@ function AdminPage() {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) { navigate({ to: "/auth" }); return; }
       setUserEmail(u.user.email ?? null);
-      const { data: roles } = await supabase
-        .from("user_roles").select("role").eq("user_id", u.user.id);
-      const admin = (roles ?? []).some((r) => r.role === "admin");
-      if (!admin) {
+      try {
+        await verifyAdmin();
+        setIsAdmin(true);
+      } catch {
         try {
           const r = await claim();
           if (r.claimed) { setIsAdmin(true); toast.success("You are the first administrator."); }
           else setIsAdmin(false);
         } catch { setIsAdmin(false); }
-      } else setIsAdmin(true);
+      }
       setLoading(false);
     })();
-  }, [navigate, claim]);
+  }, [navigate, claim, verifyAdmin]);
 
   async function signOut() {
     await supabase.auth.signOut();
