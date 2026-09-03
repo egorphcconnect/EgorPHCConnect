@@ -4,6 +4,14 @@ import { assertAdmin } from "@/lib/admins-helpers";
 
 export type AdminUser = { userId: string; email: string; isSelf: boolean };
 
+/** Verify the current authenticated user has the administrator role. */
+export const getAdminAccess = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    await assertAdmin(context);
+    return { isAdmin: true };
+  });
+
 export const listAdmins = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }): Promise<AdminUser[]> => {
