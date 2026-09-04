@@ -122,7 +122,7 @@ function AdminPage() {
       </div>
 
       <Tabs defaultValue="phcs">
-        <TabsList className="flex-wrap">
+        <TabsList className="h-auto min-h-9 w-full flex-wrap justify-start gap-1">
           <TabsTrigger value="phcs">PHCs</TabsTrigger>
           <TabsTrigger value="articles">Health Articles</TabsTrigger>
           <TabsTrigger value="categories">Categories</TabsTrigger>
