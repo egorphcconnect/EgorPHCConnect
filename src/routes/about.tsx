@@ -3,8 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import {
   HeartPulse, MapPin, MessageSquare, Sparkles, Mail, Award,
 } from "lucide-react";
-import nhfLogo from "@/assets/nhf-logo.jpg.asset.json";
-import leadPhoto from "@/assets/eseosa-irorere.jpg.asset.json";
+
 import { siteContentQuery, pageSectionsQuery, stakeholdersQuery, pageText } from "@/lib/cms";
 import { RichText, parseCardList, parseBullets } from "@/components/rich-text";
 import { CmsImage } from "@/components/cms-image";
@@ -115,7 +114,7 @@ function About() {
             >
               <CmsImage
                 value={t("programme_logo")}
-                fallbackSrc={nhfLogo.url}
+                fallbackSrc="/images/nhf-logo.jpg"
                 alt={t("programme_logo_alt")}
                 width={260}
                 height={85}
@@ -140,7 +139,7 @@ function About() {
           <div className="mt-5 grid gap-6 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)] sm:p-6 md:grid-cols-[220px_1fr]">
             <div className="mx-auto md:mx-0">
               <img
-                src={leadPhoto.url}
+                src="/images/eseosa-irorere.jpg"
                 alt="Portrait photograph of Dr. Eseosa Emmanuella Irorere, Project Visionary of EgorPHCConnect"
                 width={220}
                 height={260}

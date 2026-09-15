@@ -1,10 +1,10 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import type { PHC, HealthArticle } from "./types";
+import { supabasePublicServer } from "@/integrations/supabase/client.public.server";
 
 export const listPhcs = createServerFn({ method: "GET" }).handler(async (): Promise<PHC[]> => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await supabasePublicServer
     .from("phcs")
     .select("*")
     .order("name");
@@ -15,8 +15,7 @@ export const listPhcs = createServerFn({ method: "GET" }).handler(async (): Prom
 export const getPhc = createServerFn({ method: "GET" })
   .inputValidator((d: { id: string }) => z.object({ id: z.string().uuid() }).parse(d))
   .handler(async ({ data }): Promise<PHC | null> => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: row, error } = await supabaseAdmin
+    const { data: row, error } = await supabasePublicServer
       .from("phcs")
       .select("*")
       .eq("id", data.id)
@@ -27,8 +26,7 @@ export const getPhc = createServerFn({ method: "GET" })
 
 export const listArticles = createServerFn({ method: "GET" }).handler(
   async (): Promise<HealthArticle[]> => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabasePublicServer
       .from("health_articles")
       .select("*")
       .eq("published", true)
@@ -52,8 +50,7 @@ const feedbackSchema = z.object({
 export const submitFeedback = createServerFn({ method: "POST" })
   .inputValidator((d: unknown) => feedbackSchema.parse(d))
   .handler(async ({ data }) => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.from("feedback").insert({
+    const { error } = await supabasePublicServer.from("feedback").insert({
       phc_id: data.phc_id,
       service_used: data.service_used || null,
       rating: data.rating,

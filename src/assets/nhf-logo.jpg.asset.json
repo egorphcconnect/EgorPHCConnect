@@ -1,11 +1,4 @@
 {
   "version": 1,
-  "asset_id": "a743d268-3d92-4ee1-a89d-4eeb6a665270",
-  "project_id": "a265bf3d-c37b-47a3-87f0-c1e0616caadb",
-  "url": "/__l5e/assets-v1/a743d268-3d92-4ee1-a89d-4eeb6a665270/nhf-logo.jpg",
-  "r2_key": "a/v1/a265bf3d-c37b-47a3-87f0-c1e0616caadb/a743d268-3d92-4ee1-a89d-4eeb6a665270/nhf-logo.jpg",
-  "original_filename": "nhf-logo.jpg",
-  "size": 22833,
-  "content_type": "image/jpeg",
-  "created_at": "2026-07-23T11:58:27Z"
+  "url": "/images/nhf-logo.jpg"
 }

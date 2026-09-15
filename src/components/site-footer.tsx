@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { siteContentQuery, pageText } from "@/lib/cms";
-import nhfLogo from "@/assets/nhf-logo.jpg.asset.json";
+
 
 const APP_VERSION = "1.2.0";
 const LAST_UPDATED = "23 July 2026";
@@ -46,7 +46,7 @@ export function SiteFooter() {
             aria-label="Visit the National Health Fellows Programme website"
           >
             <img
-              src={nhfLogo.url}
+              src="/images/nhf-logo.jpg"
               alt="National Health Fellows Programme logo"
               width={200}
               height={65}

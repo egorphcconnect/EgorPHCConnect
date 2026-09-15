@@ -1,15 +1,17 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+import { supabasePublicServer } from "@/integrations/supabase/client.public.server";
 
 export const listServicesCatalog = createServerFn({ method: "GET" }).handler(
   async (): Promise<string[]> => {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data, error } = await supabaseAdmin
+    const { data, error } = await supabasePublicServer
       .from("services_catalog")
       .select("name")
       .order("name");
+
     if (error) throw new Error(error.message);
+
     return (data ?? []).map((r: { name: string }) => r.name);
   },
 );

@@ -12,7 +12,6 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { SERVICE_CATEGORIES, nowLagos, dayServices, DAY_LABELS, haversineKm, isOpenLagos } from "@/lib/types";
 import { useGeolocation } from "@/hooks/use-geolocation";
-import phcHero from "@/assets/phc-hero.png.asset.json";
 import { siteContentQuery, pageText } from "@/lib/cms";
 import { featuredNewsQuery } from "@/lib/news";
 import { NewsCard } from "@/components/news-card";
@@ -100,7 +99,7 @@ function Index() {
         className="relative isolate flex min-h-[60vh] items-center overflow-hidden md:min-h-[65vh] lg:min-h-[70vh]"
       >
         <img
-          src={phcHero.url}
+          src="/images/phc-hero.png"
           alt="Entrance to a Primary Healthcare Centre in Egor Local Government Area."
           fetchPriority="high"
           decoding="async"
