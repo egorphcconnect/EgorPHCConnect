@@ -66,7 +66,9 @@ function AdminPage() {
       try {
         await verifyAdmin();
         setIsAdmin(true);
-      } catch {
+      } catch (error) {
+        console.error("ADMIN ACCESS CHECK FAILED:", error);
+
         try {
           const r = await claim();
           if (r.claimed) { setIsAdmin(true); toast.success("You are the first administrator."); }
